@@ -82,7 +82,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 			glm::vec3 parent_joint_pos = mesh_->getJointPosition(curr_joint.parent_index);
 			glm::vec3 rotate_axis = glm::normalize(curr_joint_pos - parent_joint_pos);
 			glm::fquat rotate_quat = glm::angleAxis(roll_speed, rotate_axis);
-			mesh_->rotate_bone(current_bone_, rotate_quat);
+			mesh_->skeleton.rotate_bone(current_bone_, rotate_quat);
 			setPoseDirty();
 		}
 	} else if (key == GLFW_KEY_C && action != GLFW_RELEASE) {
@@ -103,7 +103,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
 		mesh_->saveKeyFrame();
 	} else if (key == GLFW_KEY_P && action != GLFW_RELEASE) {
-		mesh_->playAnimationFrom(0);
+		std::cout << "p pressed" << std::endl;
 	}
 
 }
@@ -159,7 +159,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		glm::fquat rotate_quat = glm::angleAxis(angle_2D, rotate_axis);
 
 		glm::fquat& joint_rot = mesh_->skeleton.cache.rot[current_bone_];
-		mesh_->rotate_bone(current_bone_, rotate_quat);
+		mesh_->skeleton.rotate_bone(current_bone_, rotate_quat);
 		// std::cout << "rotate bone: " << current_bone_ << ", by theta = " << angle_2D 
 		// 	<< ", quat: (" << rotate_quat[0] << "," << rotate_quat[1] << ", " << rotate_quat[2]  << ", " << rotate_quat[3] << ")" 
 		// 	<< ", curr orientation:  (" << joint_rot[0] << "," << joint_rot[1] << ", " << joint_rot[2]  << ", " << joint_rot[3] << ")"
@@ -186,7 +186,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 									projection_matrix_,
 									viewport);
 		glm::vec3 offset = cursor_pos_3d_1 - cursor_pos_3d_0;
-		mesh_->translate_root(offset);
+		mesh_->skeleton.translate_root(offset);
 		// std::cout << "translating root: " << offset.x << ", " << offset.y << ", " << offset.z << std::endl;
 		setPoseDirty();
 	}

@@ -28,7 +28,31 @@ std::ostream& operator<<(std::ostream& os, const BoundingBox& bounds)
 	return os;
 }
 
-void Skeleton::update_joints_by_frame(KeyFrame& frame) {
+void Skeleton::rotate_bone(const int bone_index, const glm::fquat& rotate_quat) {
+	Joint& curr_joint = joints[bone_index];
+	Joint& parent_joint = joints[curr_joint.parent_index];
+	parent_joint.rel_orientation = rotate_quat * parent_joint.rel_orientation;
+	parent_joint.orientation = rotate_quat * parent_joint.orientation;
+	update_children(parent_joint);
+}
+
+
+void Skeleton::update_children(Joint& parent_joint) {
+	for(int child_index : parent_joint.children) {
+		Joint& child_joint = joints[child_index];
+		child_joint.orientation = child_joint.rel_orientation * parent_joint.orientation;
+		child_joint.position = parent_joint.position + parent_joint.orientation * (child_joint.init_position - parent_joint.init_position);
+		update_children(child_joint);
+	}
+}
+
+void Skeleton::translate_root(glm::vec3 offset) {
+	for(Joint& joint : joints) {
+		joint.position = joint.position + offset;
+	}
+}
+
+void Skeleton::transform_skeleton_by_frame(KeyFrame& frame) {
 	for(int i = 0; i < joints.size(); i++) {
 		joints[i].rel_orientation = frame.rel_rot[i];
 	}
@@ -38,11 +62,6 @@ void Skeleton::update_joints_by_frame(KeyFrame& frame) {
 			update_children(joints[i]);
 		}
 	}
-}
-
-
-void Skeleton::downward_update(int index) {
-
 }
 
 
@@ -174,29 +193,7 @@ void Mesh::loadPmd(const std::string& fn)
 	}
 }
 
-void Mesh::rotate_bone(const int bone_index, const glm::fquat& rotate_quat) {
-	Joint& curr_joint = skeleton.joints[bone_index];
-	Joint& parent_joint = skeleton.joints[curr_joint.parent_index];
-	parent_joint.rel_orientation = rotate_quat * parent_joint.rel_orientation;
-	parent_joint.orientation = rotate_quat * parent_joint.orientation;
-	update_children(parent_joint, rotate_quat);
-}
 
-
-void Mesh::update_children(Joint& parent_joint, const glm::fquat& rotate_quat) {
-	for(int child_index : parent_joint.children) {
-		Joint& child_joint = skeleton.joints[child_index];
-		child_joint.orientation = rotate_quat * child_joint.orientation;
-		child_joint.position = parent_joint.position + parent_joint.orientation * (child_joint.init_position - parent_joint.init_position);
-		update_children(child_joint, rotate_quat);
-	}
-}
-
-void Mesh::translate_root(glm::vec3 offset) {
-	for(Joint& joint : skeleton.joints) {
-		joint.position = joint.position + offset;
-	}
-}
 
 int Mesh::getNumberOfBones() const
 {
@@ -223,7 +220,7 @@ void Mesh::updateAnimation(float t)
 		float tao = t - frame_index;
 		KeyFrame frame;
 		KeyFrame::interpolate(key_frames[frame_index], key_frames[frame_index + 1], tao, frame);
-		skeleton.update_joints_by_frame(frame);
+		skeleton.transform_skeleton_by_frame(frame);
 	}
 	skeleton.refreshCache(&currentQ_);
 	// FIXME: Support Animation Here
