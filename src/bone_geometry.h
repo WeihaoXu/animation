@@ -77,6 +77,7 @@ struct Skeleton {
 	const glm::fquat* collectJointRot() const;
 
 	// FIXME: create skeleton and bone data structures
+	const glm::mat4 getBoneTransform(int joint_index) const;
 };
 
 struct Mesh {
@@ -108,6 +109,11 @@ struct Mesh {
 
 	void saveAnimationTo(const std::string& fn);
 	void loadAnimationFrom(const std::string& fn);
+
+	glm::vec3 getJointPosition(int joint_index) const;
+	void rotate_bone(const int bone_index, const glm::fquat& rotate_quat);	// rotate a bone and recompute all children's data
+	void update_children(Joint& parent_joint, const glm::fquat& rotate_quat);
+	void translate_root(glm::vec3 offset);
 
 private:
 	void computeBounds();

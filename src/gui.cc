@@ -54,6 +54,11 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	}
 	if (key == GLFW_KEY_J && action == GLFW_RELEASE) {
 		//FIXME save out a screenshot using SaveJPEG
+		unsigned char* pixmap = (unsigned char*) malloc (sizeof(char) * window_width_ * window_height_ * 3);
+		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+		glReadPixels(0, 0, window_width_, window_height_, GL_RGB, GL_UNSIGNED_BYTE, pixmap);
+		SaveJPEG("screenshot.jpg", window_width_, window_height_, pixmap);
+		std::cout << "done screenshot" << std::endl;	
 	}
 	if (key == GLFW_KEY_S && (mods & GLFW_MOD_CONTROL)) {
 		if (action == GLFW_RELEASE)
@@ -70,6 +75,16 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		else
 			roll_speed = roll_speed_;
 		// FIXME: actually roll the bone here
+		bool drag_bone = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_LEFT;
+		if(drag_bone && current_bone_ != -1) {
+			Joint& curr_joint = mesh_->skeleton.joints[current_bone_];
+			glm::vec3 curr_joint_pos = mesh_->getJointPosition(curr_joint.joint_index);
+			glm::vec3 parent_joint_pos = mesh_->getJointPosition(curr_joint.parent_index);
+			glm::vec3 rotate_axis = glm::normalize(curr_joint_pos - parent_joint_pos);
+			glm::fquat rotate_quat = glm::angleAxis(roll_speed, rotate_axis);
+			mesh_->rotate_bone(current_bone_, rotate_quat);
+			setPoseDirty();
+		}
 	} else if (key == GLFW_KEY_C && action != GLFW_RELEASE) {
 		fps_mode_ = !fps_mode_;
 	} else if (key == GLFW_KEY_LEFT_BRACKET && action == GLFW_RELEASE) {
@@ -106,6 +121,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 
 	bool drag_camera = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_RIGHT;
 	bool drag_bone = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_LEFT;
+	bool translate_root_mode = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_MIDDLE;
 
 	if (drag_camera) {
 		glm::vec3 axis = glm::normalize(
@@ -119,11 +135,80 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		look_ = glm::column(orientation_, 2);
 	} else if (drag_bone && current_bone_ != -1) {
 		// FIXME: Handle bone rotation
+		int parent_index = mesh_->skeleton.joints[current_bone_].parent_index;
+		glm::vec3 parent_joint_pos = mesh_->getJointPosition(parent_index);
+		glm::vec3 projected_parent_pos = glm::project(parent_joint_pos,
+											view_matrix_,
+											projection_matrix_,
+											viewport);
+
+		// glm::vec2 start_direct_2D(projected_joint_pos.x - projected_parent_pos.x, projected_joint_pos.y - projected_parent_pos.y);
+		glm::vec2 start_direct_2D(last_x_ - projected_parent_pos.x, last_y_ - projected_parent_pos.y);
+		glm::vec2 end_direct_2D(current_x_ - projected_parent_pos.x, current_y_ - projected_parent_pos.y);
+		float angle_2D = angle_between_two_directs_2D(start_direct_2D, end_direct_2D);
+		// std::cout << "dragging angle: " << angle_2D << std::endl;
+
+		glm::vec3 rotate_axis = glm::normalize(parent_joint_pos - eye_);
+		// use radians because GLM_FORCE_RADIANS is set. See: https://glm.g-truc.net/0.9.4/api/a00153.html#ga30071b5b9773087b7212a5ce67d0d90a
+		glm::fquat rotate_quat = glm::angleAxis(angle_2D, rotate_axis);
+
+		glm::fquat& joint_rot = mesh_->skeleton.cache.rot[current_bone_];
+		mesh_->rotate_bone(current_bone_, rotate_quat);
+		// std::cout << "rotate bone: " << current_bone_ << ", by theta = " << angle_2D 
+		// 	<< ", quat: (" << rotate_quat[0] << "," << rotate_quat[1] << ", " << rotate_quat[2]  << ", " << rotate_quat[3] << ")" 
+		// 	<< ", curr orientation:  (" << joint_rot[0] << "," << joint_rot[1] << ", " << joint_rot[2]  << ", " << joint_rot[3] << ")"
+		// 	<< std::endl;
+
+		setPoseDirty();
+		// std::cout << "2-D coords of bone " << current_bone_ << ": " << projected_joint_pos.x 
+		// 	<< ", " << projected_joint_pos.y << std::endl;
 		return ;
+	} else if(translate_root_mode && current_bone_ != -1) {
+		int parent_index = mesh_->skeleton.joints[current_bone_].parent_index;
+		glm::vec3 parent_joint_pos = mesh_->getJointPosition(parent_index);
+		glm::vec3 projected_parent_pos = glm::project(parent_joint_pos,
+											view_matrix_,
+											projection_matrix_,
+											viewport);
+		float projected_depth = projected_parent_pos[2];
+		glm::vec3 cursor_pos_3d_0 = glm::unProject(glm::vec3(last_x_, last_y_, projected_depth),
+											view_matrix_,
+											projection_matrix_,
+											viewport);
+		glm::vec3 cursor_pos_3d_1 = glm::unProject(glm::vec3(current_x_, current_y_, projected_depth),
+									view_matrix_,
+									projection_matrix_,
+									viewport);
+		glm::vec3 offset = cursor_pos_3d_1 - cursor_pos_3d_0;
+		mesh_->translate_root(offset);
+		// std::cout << "translating root: " << offset.x << ", " << offset.y << ", " << offset.z << std::endl;
+		setPoseDirty();
 	}
 
 	// FIXME: highlight bones that have been moused over
 	current_bone_ = -1;
+	glm::vec3 mouse_pos = glm::unProject(glm::vec3(current_x_, current_y_, 1.0f),
+											view_matrix_,
+											projection_matrix_,
+											viewport);
+	// std::cout << "current position in world coords: (" << mouse_pos.x << ", " << mouse_pos.y << ", " << mouse_pos.z << ")" << std::endl;
+	glm::vec3 click_ray_direct = glm::normalize(mouse_pos - eye_);
+	glm::vec3 click_ray_end = eye_ + PICK_RAY_LEN * click_ray_direct;
+	float min_distance = std::numeric_limits<float>::max();
+	for(int i = 0; i < mesh_->getNumberOfBones(); i++) {	// iterate all bones, and find the one with min distance
+		int parent_index = mesh_->skeleton.joints[i].parent_index;
+		if(parent_index == -1) {
+			continue;	// this joint is a root.
+		}
+		glm::vec3 bone_start_position = mesh_->getJointPosition(i);
+		glm::vec3 bone_end_position = mesh_->getJointPosition(parent_index);
+		float curr_distance = line_segment_distance(eye_, click_ray_end, bone_start_position, bone_end_position);
+		if(curr_distance < kCylinderRadius && curr_distance < min_distance) {
+			min_distance = curr_distance;
+			current_bone_ = i;
+		}
+	}
+
 }
 
 void GUI::mouseButtonCallback(int button, int action, int mods)
