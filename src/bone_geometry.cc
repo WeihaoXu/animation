@@ -28,6 +28,22 @@ std::ostream& operator<<(std::ostream& os, const BoundingBox& bounds)
 	return os;
 }
 
+void Skeleton::update_joints_by_frame(KeyFrame& frame) {
+	for(int i = 0; i < joints.size(); i++) {
+		joints[i].rel_orientation = frame.rel_rot[i];
+	}
+	for(int i = 0; i < joints.size(); i++) {
+		if(joints[i].parent_index == -1) {
+			joints[i].orientation = frame.rel_rot[i];
+			update_children(joints[i]);
+		}
+	}
+}
+
+
+void Skeleton::downward_update(int index) {
+
+}
 
 
 void Skeleton::refreshCache(Configuration* target)
@@ -75,6 +91,17 @@ const glm::mat4 Skeleton::getBoneTransform(int joint_index) const
 	return translate_matrix * rotate_matrix * scale_matrix;
 
 }
+
+void KeyFrame::interpolate(const KeyFrame& from,
+	                        const KeyFrame& to,
+	                        float tau,
+	                        KeyFrame& target) {
+	target.rel_rot.clear();
+	for(int i = 0; i < from.rel_rot.size(); i++) {
+		glm::fquat kf_rot = glm::mix(from.rel_rot[i], to.rel_rot[i], tau);
+		target.rel_rot.push_back(kf_rot);
+	}
+} 
 
 
 Mesh::Mesh()
@@ -145,8 +172,6 @@ void Mesh::loadPmd(const std::string& fn)
 			vector_from_joint1.push_back(glm::vec3(vertices[vid]) - skeleton.joints[tuple.jid1].position);
 		}
 	}
-
-	updateAnimation();
 }
 
 void Mesh::rotate_bone(const int bone_index, const glm::fquat& rotate_quat) {
@@ -188,8 +213,18 @@ void Mesh::computeBounds()
 	}
 }
 
+
+
+
 void Mesh::updateAnimation(float t)
 {
+	int frame_index = floor(t);
+	if(frame_index < key_frames.size() -1) {
+		float tao = t - frame_index;
+		KeyFrame frame;
+		KeyFrame::interpolate(key_frames[frame_index], key_frames[frame_index + 1], tao, frame);
+		skeleton.update_joints_by_frame(frame);
+	}
 	skeleton.refreshCache(&currentQ_);
 	// FIXME: Support Animation Here
 }
@@ -205,3 +240,9 @@ Mesh::getCurrentQ() const
 	return &currentQ_;
 }
 
+void Mesh::saveKeyFrame() {
+	KeyFrame kf;
+	for(int i = 0; i < getNumberOfBones(); i++) {
+		kf.rel_rot.push_back(skeleton.joints[i].rel_orientation);
+	}
+}

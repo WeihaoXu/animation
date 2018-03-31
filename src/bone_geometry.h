@@ -97,6 +97,10 @@ struct Mesh {
 	std::vector<glm::vec2> uv_coordinates;
 	std::vector<glm::uvec3> faces;
 
+	std::vector<KeyFrame> key_frames;
+
+	void playAnimation();	
+
 	std::vector<Material> materials;
 	BoundingBox bounds;
 	Skeleton skeleton;
@@ -114,6 +118,8 @@ struct Mesh {
 	void rotate_bone(const int bone_index, const glm::fquat& rotate_quat);	// rotate a bone and recompute all children's data
 	void update_children(Joint& parent_joint, const glm::fquat& rotate_quat);
 	void translate_root(glm::vec3 offset);
+
+	void saveKeyFrame();
 
 private:
 	void computeBounds();

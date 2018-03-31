@@ -100,6 +100,12 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	}
 
 	// FIXME: implement other controls here.
+	else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
+		mesh_->saveKeyFrame();
+	} else if (key == GLFW_KEY_P && action != GLFW_RELEASE) {
+		mesh_->playAnimationFrom(0);
+	}
+
 }
 
 void GUI::mousePosCallback(double mouse_x, double mouse_y)
