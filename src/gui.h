@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <GLFW/glfw3.h>
 #include "procedure_geometry.h"
+#include "tictoc.h"
 
 #define PICK_RAY_LEN 1000.0f	// shoot a ray of this len when picking bones
 
@@ -48,7 +49,9 @@ public:
 
 	bool isTransparent() const { return transparent_; }
 	bool isPlaying() const { return play_; }
-	float getCurrentPlayTime() const;
+	float getCurrentPlayTime();
+
+	
 
 private:
 	GLFWwindow* window_;
@@ -57,7 +60,6 @@ private:
 	int window_width_, window_height_;
 	int view_width_, view_height_;
 	int preview_height_;
-
 	bool drag_state_ = false;
 	bool fps_mode_ = false;
 	bool pose_changed_ = true;
@@ -71,6 +73,10 @@ private:
 	float rotation_speed_ = 0.02f;
 	float zoom_speed_ = 0.1f;
 	float aspect_;
+
+	TicTocTimer* timer_ = (TicTocTimer*) malloc(sizeof(TicTocTimer));
+	float time_ = 0.0;	// fake timer for temp use.
+
 
 	glm::vec3 eye_ = glm::vec3(0.0f, 0.1f, camera_distance_);
 	glm::vec3 up_ = glm::vec3(0.0f, 1.0f, 0.0f);

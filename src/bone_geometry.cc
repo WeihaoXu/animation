@@ -106,7 +106,6 @@ const glm::mat4 Skeleton::getBoneTransform(int joint_index) const
 	glm::vec3 translate = parent_joint.position;
 	glm::mat4 translate_matrix = glm::translate(glm::mat4(1.0f), translate);
 
-
 	return translate_matrix * rotate_matrix * scale_matrix;
 
 }
@@ -215,15 +214,20 @@ void Mesh::computeBounds()
 
 void Mesh::updateAnimation(float t)
 {
+
+	
+	// FIXME: Support Animation Here
+
 	int frame_index = floor(t);
-	if(frame_index < key_frames.size() -1) {
+	if(t != -1.0 && frame_index + 1 < key_frames.size()) {
+
 		float tao = t - frame_index;
 		KeyFrame frame;
 		KeyFrame::interpolate(key_frames[frame_index], key_frames[frame_index + 1], tao, frame);
 		skeleton.transform_skeleton_by_frame(frame);
 	}
 	skeleton.refreshCache(&currentQ_);
-	// FIXME: Support Animation Here
+	
 }
 
 glm::vec3 Mesh::getJointPosition(int joint_index) const
@@ -242,4 +246,5 @@ void Mesh::saveKeyFrame() {
 	for(int i = 0; i < getNumberOfBones(); i++) {
 		kf.rel_rot.push_back(skeleton.joints[i].rel_orientation);
 	}
+	key_frames.push_back(kf);
 }

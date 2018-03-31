@@ -31,6 +31,8 @@ int preview_bar_width = preview_width;
 int preview_bar_height = main_view_height;
 const std::string window_title = "Animation";
 
+
+
 const char* vertex_shader =
 #include "shaders/default.vert"
 ;
@@ -359,6 +361,9 @@ int main(int argc, char* argv[])
 		if (gui.isPlaying()) {
 			std::stringstream title;
 			float cur_time = gui.getCurrentPlayTime();
+			// float cur_time = gui.time_;
+			// gui.time_ += 0.01f;
+
 			title << window_title << " Playing: "
 			      << std::setprecision(2)
 			      << std::setfill('0') << std::setw(6)

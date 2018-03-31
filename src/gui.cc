@@ -2,6 +2,7 @@
 #include "config.h"
 #include <jpegio.h>
 #include "bone_geometry.h"
+
 #include <iostream>
 #include <debuggl.h>
 #include <glm/gtc/matrix_access.hpp>
@@ -34,10 +35,13 @@ GUI::GUI(GLFWwindow* window, int view_width, int view_height, int preview_height
 	}
 	float aspect_ = static_cast<float>(view_width_) / view_height_;
 	projection_matrix_ = glm::perspective((float)(kFov * (M_PI / 180.0f)), aspect_, kNear, kFar);
+	*timer_ = tic();
+
 }
 
 GUI::~GUI()
 {
+	free(timer_);
 }
 
 void GUI::assignMesh(Mesh* mesh)
@@ -101,9 +105,18 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 
 	// FIXME: implement other controls here.
 	else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
+		std::cout << "keyframe saved" << std::endl;
 		mesh_->saveKeyFrame();
 	} else if (key == GLFW_KEY_P && action != GLFW_RELEASE) {
-		std::cout << "p pressed" << std::endl;
+		if(!play_) {
+			play_ = true;
+			*timer_ = tic();
+		} else {
+			play_ = false;
+		}
+	} else if(key == GLFW_KEY_R && action != GLFW_RELEASE) {
+		time_ = 0;
+
 	}
 
 }
@@ -268,9 +281,12 @@ bool GUI::setCurrentBone(int i)
 	return true;
 }
 
-float GUI::getCurrentPlayTime() const
+float GUI::getCurrentPlayTime()
 {
-	return 0.0f;
+	double delta_time = toc(timer_);
+	time_ += delta_time;
+	return time_;
+	// return 0.0f;
 }
 
 
