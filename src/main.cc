@@ -70,6 +70,14 @@ const char* cylinder_fragment_shader =
 #include "shaders/cylinder.frag"
 ;
 
+const char* preview_vertex_shader = 
+#include "shaders/preview.vert"
+;
+
+const char* preview_fragment_shader = 
+#include "shaders/preview.frag"
+;
+
 
 void ErrorCallback(int error, const char* description) {
 	std::cerr << "GLFW Error: " << description << "\n";
@@ -111,17 +119,29 @@ int main(int argc, char* argv[])
 	GLFWwindow *window = init_glefw();
 	GUI gui(window, main_view_width, main_view_height, preview_height);
 
+	TextureToRender preview_texture;
+
+	// uniforms for preview shaders
+	glm::mat4 orthomat(1.0f);
+	float frame_shift;
+	int sampler;
+	int show_border;
+
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
 	create_floor(floor_vertices, floor_faces);
 
 	LineMesh cylinder_mesh;
 	LineMesh axes_mesh;
-
 	// FIXME: we already created meshes for cylinders. Use them to render
 	//        the cylinder and axes if required by the assignment.
 	create_cylinder_mesh(cylinder_mesh);
 	create_axes_mesh(axes_mesh);
+
+	std::vector<glm::vec4> quad_vertices;
+	std::vector<glm::uvec3> quad_faces;
+	std::vector<glm::vec2> quad_coords;
+	create_quad(quad_vertices, quad_faces, quad_coords);
 
 	Mesh mesh;
 	mesh.loadPmd(argv[1]);
@@ -181,6 +201,16 @@ int main(int argc, char* argv[])
 		glUniform4fv(loc, mesh.getNumberOfBones(), (const GLfloat*)data);
 	};
 
+	auto texture0_binder = [](int loc, const void* data) {
+		CHECK_GL_ERROR(glUniform1i(loc, 0));
+		CHECK_GL_ERROR(glActiveTexture(GL_TEXTURE0 + 0));
+		CHECK_GL_ERROR(glBindTexture(GL_TEXTURE_2D, (long)data));
+		//std::cerr << " bind texture " << long(data) << std::endl;
+	};
+
+	auto sampler0_binder = [](int loc, const void* data) {
+		CHECK_GL_ERROR(glBindSampler(0, (GLuint)(long)data));
+	};
 	/*
 	 * The lambda functions below are used to retrieve data
 	 */
@@ -238,6 +268,27 @@ int main(int argc, char* argv[])
 		return &radius;
 	};
 
+	// uniform data for preview shaders
+	auto orthomat_data = [&orthomat]() -> const void* {
+		return &orthomat[0][0];
+	};
+	auto frame_shift_data = [&frame_shift]() -> const void* {
+		return &frame_shift;
+	};
+	// auto sampler_data = [&sampler]() -> const void* {
+	// 	return &sampler;
+	// };
+
+	auto sampler_data = [sampler]() -> const void* {
+		return (const void*)(intptr_t)sampler;
+	};
+
+	auto show_border_data = [&show_border]() -> const void* {
+		return &show_border;
+	};
+
+
+
 
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
 	ShaderUniform floor_model = { "model", matrix_binder, floor_model_data };
@@ -252,6 +303,14 @@ int main(int argc, char* argv[])
 	//        Otherwise, do whatever you like here
 	ShaderUniform bone_transform = { "bone_transform", matrix_binder, bone_transform_data };
 	ShaderUniform cylinder_radius = { "cylinder_radius", float_binder, cylinder_radius_data};
+
+	// Uniforms for preview shaders
+	ShaderUniform orthomat_uniform = { "orthomat", matrix_binder, orthomat_data };
+	ShaderUniform frame_shift_uniform = { "frame_shift", float_binder, frame_shift_data };
+	ShaderUniform sampler_uniform = { "sampler", texture0_binder, sampler_data };
+	ShaderUniform show_border_uniform = { "show_border", int_binder, show_border_data };
+
+
 
 	// Floor render pass
 	RenderDataInput floor_pass_input;
@@ -329,6 +388,18 @@ int main(int argc, char* argv[])
 			{ "fragment_color" }
 			);
 
+
+	// Renderpass for preview
+	RenderDataInput preview_pass_input;
+	preview_pass_input.assign(0, "vertex_position", quad_vertices.data(), quad_vertices.size(), 4, GL_FLOAT);
+	// preview_pass_input.assign(1, "tex_coord_in", quad_coords.data(), quad_coords.size(), 2, GL_FLOAT);
+	preview_pass_input.assignIndex(quad_faces.data(), quad_faces.size(), 3);
+	RenderPass preview_pass(-1, preview_pass_input,
+			{ preview_vertex_shader, nullptr, preview_fragment_shader },
+			{ orthomat_uniform, frame_shift_uniform, sampler_uniform, show_border_uniform },
+			{ "fragment_color" }
+			);
+	
 	float aspect = 0.0f;
 	std::cout << "center = " << mesh.getCenter() << "\n";
 
@@ -417,6 +488,67 @@ int main(int argc, char* argv[])
 			if (mid == 0) // Fallback
 				CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, mesh.faces.size() * 3, GL_UNSIGNED_INT, 0));
 #endif
+		}
+
+		if (gui.to_save_preview) {		
+			// FIXME: bind framebuffer, render current frame into framebuffer, and unbind
+			// TextureToRender preview_texture;
+			preview_texture.create(main_view_width, main_view_height);
+
+			preview_texture.bind();
+			// draw everything to our framebuffer
+			{
+				// Draw bones first.
+				if (draw_skeleton && gui.isTransparent()) {
+					bone_pass.setup();
+					// Draw our lines.
+					// FIXME: you need setup skeleton.joints properly in
+					//        order to see the bones.
+					CHECK_GL_ERROR(glDrawElements(GL_LINES,
+					                              bone_indices.size() * 2,
+					                              GL_UNSIGNED_INT, 0));
+				}
+				
+				// Then draw floor.
+				if (draw_floor) {
+					floor_pass.setup();
+					// Draw our triangles.
+					CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+					                              floor_faces.size() * 3,
+					                              GL_UNSIGNED_INT, 0));
+				}
+
+				// Draw the model
+				if (draw_object) {
+					object_pass.setup();
+					int mid = 0;
+					while (object_pass.renderWithMaterial(mid))
+						mid++;
+				}
+			}
+			// mesh.preview_textures.push_back(preview_texture);
+			mesh.texture_ids.push_back(preview_texture.getTexture());
+			preview_texture.unbind();
+			gui.to_save_preview = false;
+			std::cout << "preview" <<  preview_texture.getTexture() << "saved" << std::endl;
+		}
+
+		// for(int i = 0; i < mesh.preview_textures.size(); i++) {
+		for(int i = 0; i < mesh.texture_ids.size(); i++) {
+			glViewport(main_view_width, main_view_height - (i+1) * preview_height, preview_width, preview_height);
+
+			// sampler = mesh.preview_textures[i].getTexture();
+			sampler = mesh.texture_ids[i];
+			std::cout << "preview " << i << ", sampler: " << sampler << std::endl;
+			frame_shift = 0;
+			show_border = 1;
+			
+			preview_pass.setup();
+			// Draw our triangles.
+			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+			                              quad_faces.size() * 3,
+			                              GL_UNSIGNED_INT, 0));
+			
 		}
 
 		// FIXME: Draw previews here, note you need to call glViewport

@@ -51,7 +51,7 @@ public:
 	bool isPlaying() const { return play_; }
 	float getCurrentPlayTime();
 
-	
+	bool to_save_preview = false;	
 
 private:
 	GLFWwindow* window_;

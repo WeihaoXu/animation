@@ -102,6 +102,8 @@ struct Mesh {
 	std::vector<glm::uvec3> faces;
 
 	std::vector<KeyFrame> key_frames;
+	// std::vector<TextureToRender> preview_textures;
+	std::vector<int> texture_ids;
 
 	void playAnimation();	
 
