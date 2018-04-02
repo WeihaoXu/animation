@@ -239,6 +239,16 @@ void GUI::mouseButtonCallback(int button, int action, int mods)
 		return ;
 	}
 	// FIXME: Key Frame Selection
+	if (current_x_ > view_width_&& action == GLFW_PRESS) {
+		// std::cout << "mouse over preview! current_y_: " << current_y_ << std::endl;
+		current_keyframe_ = ceil((view_height_ + frame_shift - current_y_) / preview_height_) - 1;
+		if(current_keyframe_ < 0 || current_keyframe_ >= mesh_->key_frames.size()) {	// invalid keyframe index
+			current_keyframe_ = -1;
+		}
+		std::cout << "current key frame: " << current_keyframe_ << std::endl;
+	}
+
+
 }
 
 void GUI::mouseScrollCallback(double dx, double dy)
@@ -246,7 +256,7 @@ void GUI::mouseScrollCallback(double dx, double dy)
 	if (current_x_ < view_width_)
 		return;
 	// FIXME: Mouse Scrolling
-	frame_shift += -10 * (int)dy;
+	frame_shift += -20 * (int)dy;
 }
 
 void GUI::updateMatrices()

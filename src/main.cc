@@ -451,7 +451,8 @@ int main(int argc, char* argv[])
 		// render keyframes that loaded from json file into preview textures 
 		if(mesh.to_load_animation) {
 			for(int i = 0; i < mesh.key_frames.size(); i++) {
-				mesh.updateAnimation(1.0 * i);
+				mesh.skeleton.transform_skeleton_by_frame(mesh.key_frames[i]);
+				mesh.updateAnimation();
 				TextureToRender* texture = new TextureToRender();
 				texture->create(main_view_width, main_view_height);
 				texture->bind();
