@@ -82,6 +82,8 @@ struct Skeleton {
 	void update_children(Joint& parent_joint);
 	void transform_skeleton_by_frame(KeyFrame& frame);
 	void translate_root(glm::vec3 offset);
+	void set_rest_pose();
+
 };
 
 struct Mesh {
@@ -102,6 +104,7 @@ struct Mesh {
 	std::vector<glm::uvec3> faces;
 
 	std::vector<KeyFrame> key_frames;
+	bool to_load_animation;	// flag of load animation from external files
 
 	void playAnimation();	
 

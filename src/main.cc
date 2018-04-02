@@ -410,6 +410,8 @@ int main(int argc, char* argv[])
 
 	if (argc >= 3) {
 		mesh.loadAnimationFrom(argv[2]);
+		// load external animation files
+		mesh.to_load_animation = true;	
 	}
 
 	while (!glfwWindowShouldClose(window)) {
@@ -445,6 +447,33 @@ int main(int argc, char* argv[])
 			mesh.updateAnimation();
 			gui.clearPose();
 		}
+
+		// render keyframes that loaded from json file into preview textures 
+		if(mesh.to_load_animation) {
+			for(int i = 0; i < mesh.key_frames.size(); i++) {
+				mesh.updateAnimation(1.0 * i);
+				TextureToRender* texture = new TextureToRender();
+				texture->create(main_view_width, main_view_height);
+				texture->bind();
+
+				floor_pass.setup();
+				CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+				                              floor_faces.size() * 3,
+				                              GL_UNSIGNED_INT, 0));
+				object_pass.setup();
+				int mid = 0;
+				while (object_pass.renderWithMaterial(mid))
+					mid++;
+	
+				textures.push_back(texture);
+				mesh.skeleton.set_rest_pose();
+				mesh.to_load_animation = false;
+				texture->unbind();		
+			}
+		}
+
+			
+
 
 		// FIXME: update the preview textures here
 
@@ -511,9 +540,11 @@ int main(int argc, char* argv[])
 			gui.to_save_preview = false;
 		}
 
+		
+
 		for(int i = 0; i < textures.size(); i++) {
 			glViewport(main_view_width, main_view_height - (i + 1) * preview_height + gui.get_frame_shift(), preview_width, preview_height);
-			std::cout << "shift is " << gui.get_frame_shift() << std::endl;
+			// std::cout << "shift is " << gui.get_frame_shift() << std::endl;
 			sampler = textures[i]->getTexture();
 			show_border = 1;
 

@@ -110,6 +110,18 @@ const glm::mat4 Skeleton::getBoneTransform(int joint_index) const
 
 }
 
+void Skeleton::set_rest_pose()
+{
+	for(int i = 0; i < joints.size(); i++) {
+		joints[i].rel_orientation = glm::fquat();
+	}
+	for(int i = 0; i < joints.size(); i++) {
+		if(joints[i].parent_index == -1) {
+			update_children(joints[i]);
+		}
+	}
+}
+
 void KeyFrame::interpolate(const KeyFrame& from,
 	                        const KeyFrame& to,
 	                        float tau,

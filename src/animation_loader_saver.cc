@@ -38,7 +38,7 @@ void Mesh::saveAnimationTo(const std::string& fn)
 	outfile.open (fn);
 	outfile << json_str;
 	outfile.close();
-	// std::cout << "wrote animation to " << fn << std::endl;
+	std::cout << "wrote animation to " << fn << std::endl;
 
 
 
@@ -50,7 +50,7 @@ void Mesh::loadAnimationFrom(const std::string& fn)
 	std::ifstream in_stream(fn);
 	std::string json_str((std::istreambuf_iterator<char>(in_stream)),
                  std::istreambuf_iterator<char>());
-	std::cout << "load json string: " << json_str << std::endl;
+	// std::cout << "load json string: " << json_str << std::endl;
 	json my_json = json::parse(json_str);
 	key_frames.clear();
 	for(int i = 0; i < my_json.size(); i++) {
