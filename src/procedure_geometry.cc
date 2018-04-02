@@ -207,3 +207,19 @@ void printMat4(const glm::mat4& mat) {
 	std::cout << std::endl;
 }
 
+void create_quad(std::vector<glm::vec4>& quad_vertices, 
+					std::vector<glm::uvec3>& quad_faces, 
+					std::vector<glm::vec2>& quad_coords) {
+	quad_vertices.push_back(glm::vec4(-1.0, -1.0, 0.0, 1.0));
+	quad_vertices.push_back(glm::vec4(-1.0, 1.0, 0.0, 1.0));
+	quad_vertices.push_back(glm::vec4(1.0, -1.0, 0.0, 1.0));
+	quad_vertices.push_back(glm::vec4(1.0, 1.0, 0.0, 1.0));
+
+	quad_faces.push_back(glm::uvec3(0, 2, 3));
+	quad_faces.push_back(glm::uvec3(1, 0, 3));
+
+	quad_coords.push_back(glm::vec2(0.0, 0.0));
+	quad_coords.push_back(glm::vec2(0.0, 1.0));
+	quad_coords.push_back(glm::vec2(1.0, 0.0));
+	quad_coords.push_back(glm::vec2(1.0, 1.0));		
+}

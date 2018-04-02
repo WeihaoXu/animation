@@ -107,6 +107,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
 		std::cout << "keyframe saved" << std::endl;
 		mesh_->saveKeyFrame();
+		to_save_preview = true;
 	} else if (key == GLFW_KEY_P && action != GLFW_RELEASE) {
 		if(!play_) {
 			play_ = true;
