@@ -51,6 +51,8 @@ public:
 	bool isPlaying() const { return play_; }
 	float getCurrentPlayTime();
 
+	int get_frame_shift() { return frame_shift; }
+
 	bool to_save_preview = false;
 	
 
@@ -77,6 +79,8 @@ private:
 
 	TicTocTimer* timer_ = (TicTocTimer*) malloc(sizeof(TicTocTimer));
 	float time_ = 0.0;	// fake timer for temp use.
+
+	int frame_shift = 0;
 
 
 	glm::vec3 eye_ = glm::vec3(0.0f, 0.1f, camera_distance_);

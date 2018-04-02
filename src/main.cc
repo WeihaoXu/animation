@@ -512,7 +512,8 @@ int main(int argc, char* argv[])
 		}
 
 		for(int i = 0; i < textures.size(); i++) {
-			glViewport(main_view_width, main_view_height - (i + 1) * preview_height, preview_width, preview_height);
+			glViewport(main_view_width, main_view_height - (i + 1) * preview_height + gui.get_frame_shift(), preview_width, preview_height);
+			std::cout << "shift is " << gui.get_frame_shift() << std::endl;
 			sampler = textures[i]->getTexture();
 			show_border = 1;
 

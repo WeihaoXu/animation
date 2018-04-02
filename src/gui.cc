@@ -246,6 +246,7 @@ void GUI::mouseScrollCallback(double dx, double dy)
 	if (current_x_ < view_width_)
 		return;
 	// FIXME: Mouse Scrolling
+	frame_shift += -10 * (int)dy;
 }
 
 void GUI::updateMatrices()
