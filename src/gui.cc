@@ -2,6 +2,7 @@
 #include "config.h"
 #include <jpegio.h>
 #include "bone_geometry.h"
+#include "texture_to_render.h"
 
 #include <iostream>
 #include <debuggl.h>
@@ -108,16 +109,28 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		std::cout << "keyframe saved" << std::endl;
 		mesh_->saveKeyFrame();
 		to_save_preview = true;
-	} else if (key == GLFW_KEY_P && action != GLFW_RELEASE) {
+	} else if (key == GLFW_KEY_P && action != GLFW_RELEASE) {	// resume/pause timer
 		if(!play_) {
 			play_ = true;
 			*timer_ = tic();
 		} else {
 			play_ = false;
 		}
-	} else if(key == GLFW_KEY_R && action != GLFW_RELEASE) {
+	} else if(key == GLFW_KEY_R && action != GLFW_RELEASE) {	// reset timer
 		time_ = 0;
-
+	} else if(key == GLFW_KEY_U && action != GLFW_RELEASE) {	// load keyframe into main view
+		if(current_keyframe_ != -1) {	// bone selected
+			mesh_->skeleton.transform_skeleton_by_frame(mesh_->key_frames[current_keyframe_]);
+			mesh_->updateAnimation();
+		}
+	} else if(key == GLFW_KEY_DELETE && action != GLFW_RELEASE) {
+		if(current_keyframe_ != -1) {
+			mesh_->delete_keyframe(current_keyframe_);
+		}
+	} else if(key == GLFW_KEY_SPACE) {
+		if(current_keyframe_ != -1) {
+			mesh_->overwrite_keyframe_with_current(current_keyframe_);
+		}
 	}
 
 }

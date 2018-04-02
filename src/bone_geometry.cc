@@ -140,6 +140,11 @@ Mesh::Mesh()
 
 Mesh::~Mesh()
 {
+	for(int i = 0; i < textures.size(); i++) {
+		TextureToRender* current_texture = textures[i];
+		delete current_texture;
+	}
+	textures.clear();
 }
 
 void Mesh::loadPmd(const std::string& fn)
@@ -259,4 +264,24 @@ void Mesh::saveKeyFrame() {
 		kf.rel_rot.push_back(skeleton.joints[i].rel_orientation);
 	}
 	key_frames.push_back(kf);
+}
+
+void Mesh::delete_keyframe(int keyframe_index) {
+	key_frames.erase(key_frames.begin() + keyframe_index);
+	// delete mesh_->textures[current_keyframe_];
+	TextureToRender* texture = textures[keyframe_index];
+	textures.erase(textures.begin() + keyframe_index);
+	delete texture;
+	std::cout << "deleted key frame " << keyframe_index << std::endl;
+}
+
+void Mesh::overwrite_keyframe_with_current(int target_keyframe) {
+	KeyFrame& kf = key_frames[target_keyframe];
+	for(int i = 0; i < getNumberOfBones(); i++) {
+		kf.rel_rot[i] = skeleton.joints[i].rel_orientation;
+	}
+	key_frame_to_overwrite = target_keyframe;
+	to_overwrite_keyframe = true;
+
+	
 }

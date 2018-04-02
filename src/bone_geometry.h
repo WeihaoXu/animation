@@ -104,7 +104,10 @@ struct Mesh {
 	std::vector<glm::uvec3> faces;
 
 	std::vector<KeyFrame> key_frames;
+	std::vector<TextureToRender*> textures; // TextureToRender
 	bool to_load_animation;	// flag of load animation from external files
+	bool to_overwrite_keyframe = false;
+	int key_frame_to_overwrite;
 
 	void playAnimation();	
 
@@ -122,7 +125,9 @@ struct Mesh {
 	void loadAnimationFrom(const std::string& fn);
 
 	glm::vec3 getJointPosition(int joint_index) const;
-	
+
+	void delete_keyframe(int current_keyframe_);
+	void overwrite_keyframe_with_current(int target_keyframe);
 
 	void saveKeyFrame();
 

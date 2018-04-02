@@ -138,8 +138,7 @@ int main(int argc, char* argv[])
 	int sampler;
 	int show_border = 1;
 
-	// TextureToRender
-	std::vector<TextureToRender*> textures;
+	
 
 	// FIXME: we already created meshes for cylinders. Use them to render
 	//        the cylinder and axes if required by the assignment.
@@ -466,11 +465,36 @@ int main(int argc, char* argv[])
 				while (object_pass.renderWithMaterial(mid))
 					mid++;
 	
-				textures.push_back(texture);
+				mesh.textures.push_back(texture);
 				mesh.skeleton.set_rest_pose();
 				mesh.to_load_animation = false;
 				texture->unbind();		
 			}
+		}
+
+		if(mesh.to_overwrite_keyframe) {
+			int key_frame_idx = mesh.key_frame_to_overwrite;
+			TextureToRender* new_texture = new TextureToRender();
+
+			new_texture->create(main_view_width, main_view_height);
+			new_texture->bind();
+
+			floor_pass.setup();
+			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+			                              floor_faces.size() * 3,
+			                              GL_UNSIGNED_INT, 0));
+			object_pass.setup();
+			int mid = 0;
+			while (object_pass.renderWithMaterial(mid))
+				mid++;
+
+			// mesh.textures.push_back(texture);
+			new_texture->unbind();		
+			TextureToRender* old_texture = mesh.textures[key_frame_idx];
+			delete old_texture;
+			mesh.textures[key_frame_idx] = new_texture;
+			new_texture->unbind();
+			mesh.to_overwrite_keyframe = false;
 		}
 
 		int current_bone = gui.getCurrentBone();
@@ -532,18 +556,24 @@ int main(int argc, char* argv[])
 			while (object_pass.renderWithMaterial(mid))
 				mid++;
 				
-			textures.push_back(texture);
+			mesh.textures.push_back(texture);
 			texture->unbind();
 			gui.to_save_preview = false;
 		}
 
 		
 		// FIXME: Draw previews here, note you need to call glViewport
-		for(int i = 0; i < textures.size(); i++) {
+		for(int i = 0; i < mesh.textures.size(); i++) {
 			glViewport(main_view_width, main_view_height - (i + 1) * preview_height + gui.get_frame_shift(), preview_width, preview_height);
 			// std::cout << "shift is " << gui.get_frame_shift() << std::endl;
-			sampler = textures[i]->getTexture();
-			show_border = 1;
+			sampler = mesh.textures[i]->getTexture();
+			if(i == gui.get_current_keyframe()) {
+				show_border = 1;
+			}
+			else {
+				show_border = 0;
+			}
+			
 
 			preview_pass.setup();
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
@@ -556,9 +586,6 @@ int main(int argc, char* argv[])
 		// Poll and swap.
 		glfwPollEvents();
 		glfwSwapBuffers(window);
-	}
-	for(int i = 0; i < textures.size(); i++) {
-		delete(textures[i]);
 	}
 	glfwDestroyWindow(window);
 	glfwTerminate();
