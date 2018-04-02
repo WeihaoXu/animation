@@ -245,7 +245,7 @@ void GUI::mouseButtonCallback(int button, int action, int mods)
 		if(current_keyframe_ < 0 || current_keyframe_ >= mesh_->key_frames.size()) {	// invalid keyframe index
 			current_keyframe_ = -1;
 		}
-		std::cout << "current key frame: " << current_keyframe_ << std::endl;
+		// std::cout << "current key frame: " << current_keyframe_ << std::endl;
 	}
 
 

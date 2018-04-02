@@ -473,11 +473,6 @@ int main(int argc, char* argv[])
 			}
 		}
 
-			
-
-
-		// FIXME: update the preview textures here
-
 		int current_bone = gui.getCurrentBone();
 
 		// Draw bones first.
@@ -520,6 +515,7 @@ int main(int argc, char* argv[])
 #endif
 		}
 
+		// FIXME: update the preview textures here
 		if(gui.to_save_preview) {
 			TextureToRender* texture = new TextureToRender();
 			texture->create(main_view_width, main_view_height);
@@ -542,7 +538,7 @@ int main(int argc, char* argv[])
 		}
 
 		
-
+		// FIXME: Draw previews here, note you need to call glViewport
 		for(int i = 0; i < textures.size(); i++) {
 			glViewport(main_view_width, main_view_height - (i + 1) * preview_height + gui.get_frame_shift(), preview_width, preview_height);
 			// std::cout << "shift is " << gui.get_frame_shift() << std::endl;
@@ -556,7 +552,7 @@ int main(int argc, char* argv[])
 		}	
 		// glViewport(0, 0, main_view_width, main_view_height);
 
-		// FIXME: Draw previews here, note you need to call glViewport
+		
 		// Poll and swap.
 		glfwPollEvents();
 		glfwSwapBuffers(window);
