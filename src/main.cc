@@ -136,7 +136,8 @@ int main(int argc, char* argv[])
 	glm::mat4 orthomat;
 	float frame_shift;
 	int sampler;
-	int show_border = 1;
+	int show_border = 0;
+	int show_insert_cursor = 0;
 
 	
 
@@ -288,6 +289,10 @@ int main(int argc, char* argv[])
 	auto frame_shift_data = [&frame_shift]() -> const void* {
 		return &frame_shift;
 	};
+
+	auto show_insert_cursor_data = [&show_insert_cursor]() -> const void* {
+		return &show_insert_cursor;
+	};
 	
 
 
@@ -310,7 +315,7 @@ int main(int argc, char* argv[])
 	ShaderUniform show_border_uniform = { "show_border", int_binder, show_border_data };
 	ShaderUniform orthomat_uniform = { "orthomat", matrix_binder, orthomat_data };
 	ShaderUniform frame_shift_uniform = { "frame_shift", float_binder, frame_shift_data };
-	
+	ShaderUniform show_insert_cursor_uniform = {"show_insert_cursor", int_binder, show_insert_cursor_data};
 
 
 	// Floor render pass
@@ -395,7 +400,7 @@ int main(int argc, char* argv[])
 	preview_pass_input.assignIndex(quad_faces.data(), quad_faces.size(), 3);
 	RenderPass preview_pass(-1, preview_pass_input,
 			{preview_vertex_shader, nullptr, preview_fragment_shader},
-			{orthomat_uniform, frame_shift_uniform, sampler_uniform, show_border_uniform},
+			{orthomat_uniform, frame_shift_uniform, sampler_uniform, show_border_uniform, show_insert_cursor_uniform},
 			{"fragment_color"}
 			);
 
@@ -568,14 +573,22 @@ int main(int argc, char* argv[])
 			glViewport(main_view_width, main_view_height - (i + 1) * preview_height + gui.get_frame_shift(), preview_width, preview_height);
 			// std::cout << "shift is " << gui.get_frame_shift() << std::endl;
 			sampler = mesh.textures[i]->getTexture();
+			bool insert_enabled = gui.insert_keyframe_enabled();
 			if(i == gui.get_current_keyframe()) {
-				show_border = 1;
+				if(!insert_enabled) {
+					show_border = 1;
+					show_insert_cursor = 0;
+				} 
+				else {
+					show_border = 0;
+					show_insert_cursor = 1;
+				}
 			}
 			else {
 				show_border = 0;
+				show_insert_cursor = 0;
 			}
-			
-
+			std::cout << "texture " << i << ", show cursor? " << show_insert_cursor << ", show border? " << show_border << std::endl;
 			preview_pass.setup();
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
 			                              quad_faces.size() * 3,

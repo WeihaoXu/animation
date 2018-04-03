@@ -127,10 +127,13 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		if(current_keyframe_ != -1) {
 			mesh_->delete_keyframe(current_keyframe_);
 		}
-	} else if(key == GLFW_KEY_SPACE) {
+	} else if(key == GLFW_KEY_SPACE && action != GLFW_RELEASE) {
 		if(current_keyframe_ != -1) {
 			mesh_->overwrite_keyframe_with_current(current_keyframe_);
 		}
+	} else if(key == GLFW_KEY_I && action != GLFW_RELEASE) {
+		// toggle insert mode
+		insert_keyframe_enabled_ = !insert_keyframe_enabled_;
 	}
 
 }

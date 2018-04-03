@@ -54,7 +54,10 @@ public:
 	int get_frame_shift() { return frame_shift; }
 	int get_current_keyframe() {return current_keyframe_; };
 
+	bool insert_keyframe_enabled() {return insert_keyframe_enabled_;}
+
 	bool to_save_preview = false;
+
 	
 
 private:
@@ -68,6 +71,9 @@ private:
 	bool fps_mode_ = false;
 	bool pose_changed_ = true;
 	bool transparent_ = false;
+
+	bool insert_keyframe_enabled_ = false;
+
 	int current_bone_ = -1;
 	int current_keyframe_ = -1;
 	int current_button_ = -1;
