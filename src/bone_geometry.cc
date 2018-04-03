@@ -207,6 +207,7 @@ void Mesh::loadPmd(const std::string& fn)
 			vector_from_joint1.push_back(glm::vec3(vertices[vid]) - skeleton.joints[tuple.jid1].position);
 		}
 	}
+	// updateAnimation();
 }
 
 

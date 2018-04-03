@@ -466,10 +466,11 @@ int main(int argc, char* argv[])
 					mid++;
 	
 				mesh.textures.push_back(texture);
-				mesh.skeleton.set_rest_pose();
 				mesh.to_load_animation = false;
 				texture->unbind();		
 			}
+			mesh.skeleton.set_rest_pose();
+			mesh.updateAnimation();
 		}
 
 		if(mesh.to_overwrite_keyframe) {

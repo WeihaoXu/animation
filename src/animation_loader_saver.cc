@@ -63,6 +63,6 @@ void Mesh::loadAnimationFrom(const std::string& fn)
 		}
 		key_frames.push_back(key_frame);
 	}
-	skeleton.transform_skeleton_by_frame(key_frames[0]);
+	// skeleton.transform_skeleton_by_frame(key_frames[0]);
 	// FIXME: Load keyframes from json file.
 }
