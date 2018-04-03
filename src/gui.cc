@@ -128,8 +128,10 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 			mesh_->delete_keyframe(current_keyframe_);
 		}
 	} else if(key == GLFW_KEY_SPACE && action != GLFW_RELEASE) {
-		if(current_keyframe_ != -1) {
+		if(!insert_keyframe_enabled_ && current_keyframe_ != -1) {	// override keyframe
 			mesh_->overwrite_keyframe_with_current(current_keyframe_);
+		} else if(insert_keyframe_enabled_ && current_keyframe_ != -1){	// insert a new keyframe after current_keyframe
+			mesh_->insert_keyframe_before(current_keyframe_);
 		}
 	} else if(key == GLFW_KEY_I && action != GLFW_RELEASE) {
 		// toggle insert mode

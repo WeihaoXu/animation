@@ -588,7 +588,7 @@ int main(int argc, char* argv[])
 				show_border = 0;
 				show_insert_cursor = 0;
 			}
-			std::cout << "texture " << i << ", show cursor? " << show_insert_cursor << ", show border? " << show_border << std::endl;
+			// std::cout << "texture " << i << ", show cursor? " << show_insert_cursor << ", show border? " << show_border << std::endl;
 			preview_pass.setup();
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
 			                              quad_faces.size() * 3,

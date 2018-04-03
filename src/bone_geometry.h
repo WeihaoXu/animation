@@ -128,6 +128,7 @@ struct Mesh {
 
 	void delete_keyframe(int current_keyframe_);
 	void overwrite_keyframe_with_current(int target_keyframe);
+	void insert_keyframe_before(int keyframe_index);
 
 	void saveKeyFrame();
 

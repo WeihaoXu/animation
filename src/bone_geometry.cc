@@ -286,3 +286,18 @@ void Mesh::overwrite_keyframe_with_current(int target_keyframe) {
 
 	
 }
+
+// insert the current pose in main view before keyframe_index.
+// here I reuse the code of overwriting keyframe in the main. The key idea is to insert a nullptr into
+// textures, and overwrite it. 
+void Mesh::insert_keyframe_before(int keyframe_index) {
+	KeyFrame keyframe_to_insert;
+	for(int i = 0; i < getNumberOfBones(); i++) {
+		keyframe_to_insert.rel_rot.push_back(skeleton.joints[i].rel_orientation);
+	}
+	key_frames.insert(key_frames.begin() + keyframe_index, keyframe_to_insert);	// std::vector::insert() inserts before pos
+	textures.insert(textures.begin() + keyframe_index, nullptr);
+	key_frame_to_overwrite = keyframe_index;
+	to_overwrite_keyframe = true;
+	std::cout << "insert new frame before " << keyframe_index << std::endl;
+}
