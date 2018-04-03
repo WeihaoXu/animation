@@ -133,9 +133,9 @@ int main(int argc, char* argv[])
 	LineMesh axes_mesh;
 
 	// preview uniforms
-	glm::mat4 orthomat;
-	float frame_shift;
-	int sampler;
+	glm::mat4 orthomat(1.0);
+	float frame_shift = 0.0;
+	int sampler = 0;
 	int show_border = 0;
 	int show_insert_cursor = 0;
 
@@ -494,8 +494,7 @@ int main(int argc, char* argv[])
 			while (object_pass.renderWithMaterial(mid))
 				mid++;
 
-			// mesh.textures.push_back(texture);
-			new_texture->unbind();		
+			// mesh.textures.push_back(texture);	
 			TextureToRender* old_texture = mesh.textures[key_frame_idx];
 			delete old_texture;
 			mesh.textures[key_frame_idx] = new_texture;
@@ -555,8 +554,6 @@ int main(int argc, char* argv[])
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
 			                              floor_faces.size() * 3,
 			                              GL_UNSIGNED_INT, 0));
-
-
 			object_pass.setup();
 			int mid = 0;
 			while (object_pass.renderWithMaterial(mid))
@@ -567,12 +564,14 @@ int main(int argc, char* argv[])
 			gui.to_save_preview = false;
 		}
 
+		// std::cout << "texture numbers: " << mesh.textures.size() << std::endl;
 		
 		// FIXME: Draw previews here, note you need to call glViewport
 		for(int i = 0; i < mesh.textures.size(); i++) {
 			glViewport(main_view_width, main_view_height - (i + 1) * preview_height + gui.get_frame_shift(), preview_width, preview_height);
 			// std::cout << "shift is " << gui.get_frame_shift() << std::endl;
 			sampler = mesh.textures[i]->getTexture();
+
 			bool insert_enabled = gui.insert_keyframe_enabled();
 			if(i == gui.get_current_keyframe()) {
 				if(!insert_enabled) {
@@ -594,7 +593,7 @@ int main(int argc, char* argv[])
 			                              quad_faces.size() * 3,
 			                              GL_UNSIGNED_INT, 0));
 		}	
-		// glViewport(0, 0, main_view_width, main_view_height);
+		glViewport(0, 0, main_view_width, main_view_height);
 
 		
 		// Poll and swap.
