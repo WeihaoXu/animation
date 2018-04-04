@@ -29,6 +29,11 @@ int preview_width = window_width - main_view_width; // 320
 int preview_height = preview_width / 4 * 3; // 320 / 4 * 3 = 240
 int preview_bar_width = preview_width;
 int preview_bar_height = main_view_height;
+int scroll_bar_width = 10;
+
+
+
+
 const std::string window_title = "Animation";
 
 
@@ -78,7 +83,13 @@ const char* preview_fragment_shader =
 #include "shaders/preview.frag"
 ;
 
+const char* scroll_bar_vertex_shader = 
+#include "shaders/scroll_bar.vert"
+;
 
+const char* scroll_bar_fragment_shader  = 
+#include "shaders/scroll_bar.frag"
+;
 
 void ErrorCallback(int error, const char* description) {
 	std::cerr << "GLFW Error: " << description << "\n";
@@ -129,6 +140,11 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec2> quad_coords;
 	create_quad(quad_vertices, quad_faces, quad_coords);
 
+	std::vector<glm::vec4> scroll_bar_vertices;
+	std::vector<glm::uvec3> scroll_bar_faces;
+	std::vector<glm::vec2> scroll_bar_coords;
+	create_quad(scroll_bar_vertices, scroll_bar_faces, scroll_bar_coords);
+
 	LineMesh cylinder_mesh;
 	LineMesh axes_mesh;
 
@@ -139,7 +155,6 @@ int main(int argc, char* argv[])
 	int show_border = 0;
 	int show_insert_cursor = 0;
 
-	
 
 	// FIXME: we already created meshes for cylinders. Use them to render
 	//        the cylinder and axes if required by the assignment.
@@ -286,13 +301,21 @@ int main(int argc, char* argv[])
 	auto orthomat_data = [&orthomat]() -> const void* {
 		return &orthomat[0][0];
 	};
-	auto frame_shift_data = [&frame_shift]() -> const void* {
+	auto frame_shift_data = [&frame_shift, &gui]() -> const void* {
+		frame_shift = gui.get_frame_shift();
 		return &frame_shift;
 	};
 
 	auto show_insert_cursor_data = [&show_insert_cursor]() -> const void* {
 		return &show_insert_cursor;
 	};
+
+	int total_preview_num = 0;
+	auto total_preview_num_data =  [&total_preview_num, &mesh]() -> const void* {
+		total_preview_num = mesh.textures.size();
+		return &total_preview_num;
+	};
+
 	
 
 
@@ -316,6 +339,8 @@ int main(int argc, char* argv[])
 	ShaderUniform orthomat_uniform = { "orthomat", matrix_binder, orthomat_data };
 	ShaderUniform frame_shift_uniform = { "frame_shift", float_binder, frame_shift_data };
 	ShaderUniform show_insert_cursor_uniform = {"show_insert_cursor", int_binder, show_insert_cursor_data};
+
+	ShaderUniform total_preview_num_uniform = {"total_preview_num", int_binder, total_preview_num_data};
 
 
 	// Floor render pass
@@ -404,6 +429,18 @@ int main(int argc, char* argv[])
 			{"fragment_color"}
 			);
 
+	// scroll_bar_vertices, scroll_bar_faces, scroll_bar_coords
+
+	RenderDataInput scroll_bar_pass_input;
+	scroll_bar_pass_input.assign(0, "vertex_position", scroll_bar_vertices.data(), scroll_bar_vertices.size(), 4, GL_FLOAT);
+	scroll_bar_pass_input.assign(1, "tex_coord_in", scroll_bar_coords.data(), scroll_bar_coords.size(), 2, GL_FLOAT);
+	scroll_bar_pass_input.assignIndex(scroll_bar_faces.data(), scroll_bar_faces.size(), 3);
+	RenderPass scroll_bar_pass(-1, scroll_bar_pass_input,
+			{scroll_bar_vertex_shader, nullptr, scroll_bar_fragment_shader},
+			{frame_shift_uniform, total_preview_num_uniform},
+			{"fragment_color"}
+			);
+
 	float aspect = 0.0f;
 	std::cout << "center = " << mesh.getCenter() << "\n";
 
@@ -411,6 +448,7 @@ int main(int argc, char* argv[])
 	bool draw_skeleton = true;
 	bool draw_object = true;
 	bool draw_cylinder = true;
+	bool draw_scroll_bar = true;
 
 	if (argc >= 3) {
 		mesh.loadAnimationFrom(argv[2]);
@@ -544,8 +582,18 @@ int main(int argc, char* argv[])
 #endif
 		}
 
+		if(draw_scroll_bar) {
+			glViewport(window_width - scroll_bar_width, 0, window_width, window_height);
+			scroll_bar_pass.setup();
+			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+			                              scroll_bar_faces.size() * 3,
+			                              GL_UNSIGNED_INT, 0));
+			glViewport(0, 0, main_view_width, main_view_height);
+		}
+		
+
 		// FIXME: update the preview textures here
-		if(gui.to_save_preview) {
+		if(mesh.to_save_preview) {
 			TextureToRender* texture = new TextureToRender();
 			texture->create(main_view_width, main_view_height);
 			texture->bind();
@@ -561,7 +609,7 @@ int main(int argc, char* argv[])
 				
 			mesh.textures.push_back(texture);
 			texture->unbind();
-			gui.to_save_preview = false;
+			mesh.to_save_preview = false;
 		}
 
 		// std::cout << "texture numbers: " << mesh.textures.size() << std::endl;
@@ -569,7 +617,7 @@ int main(int argc, char* argv[])
 		// FIXME: Draw previews here, note you need to call glViewport
 		for(int i = 0; i < mesh.textures.size(); i++) {
 			glViewport(main_view_width, main_view_height - (i + 1) * preview_height + gui.get_frame_shift(), preview_width, preview_height);
-			// std::cout << "shift is " << gui.get_frame_shift() << std::endl;
+			std::cout << "shift is " << gui.get_frame_shift() << std::endl;
 			sampler = mesh.textures[i]->getTexture();
 
 			bool insert_enabled = gui.insert_keyframe_enabled();

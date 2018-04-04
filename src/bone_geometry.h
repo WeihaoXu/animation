@@ -105,8 +105,9 @@ struct Mesh {
 
 	std::vector<KeyFrame> key_frames;
 	std::vector<TextureToRender*> textures; // TextureToRender
-	bool to_load_animation;	// flag of load animation from external files
+	bool to_load_animation = false;	// flag of load animation from external files
 	bool to_overwrite_keyframe = false;
+	bool to_save_preview = false;
 	int key_frame_to_overwrite;
 
 	void playAnimation();	

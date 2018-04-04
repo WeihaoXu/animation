@@ -108,7 +108,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
 		std::cout << "keyframe saved" << std::endl;
 		mesh_->saveKeyFrame();
-		to_save_preview = true;
+		mesh_->to_save_preview = true;
 	} else if (key == GLFW_KEY_P && action != GLFW_RELEASE) {	// resume/pause timer
 		if(!play_) {
 			play_ = true;
@@ -263,7 +263,7 @@ void GUI::mouseButtonCallback(int button, int action, int mods)
 		if(current_keyframe_ < 0 || current_keyframe_ >= mesh_->key_frames.size()) {	// invalid keyframe index
 			current_keyframe_ = -1;
 		}
-		// std::cout << "current key frame: " << current_keyframe_ << std::endl;
+		std::cout << "current key frame: " << current_keyframe_ << std::endl;
 	}
 
 
@@ -274,7 +274,13 @@ void GUI::mouseScrollCallback(double dx, double dy)
 	if (current_x_ < view_width_)
 		return;
 	// FIXME: Mouse Scrolling
+	int MIN_SHIFT = 0;
+	int MAX_SHIFT = mesh_->textures.size() * preview_height_ - 3 * preview_height_;
+	MAX_SHIFT = std::max(0, MAX_SHIFT);
+
 	frame_shift += -20 * (int)dy;
+	frame_shift = std::max(MIN_SHIFT, frame_shift);
+	frame_shift = std::min(MAX_SHIFT, frame_shift);
 }
 
 void GUI::updateMatrices()

@@ -10,7 +10,7 @@ void main()
 	// tex_coord = vertex_position.xy / 2.0 + vec2(0.5, 0.5);
 	tex_coord = tex_coord_in;
 	vec4 pos = vertex_position;
-	pos.y += frame_shift;
+	// pos.y += frame_shift;
 	gl_Position = orthomat * pos;
 }
 )zzz"

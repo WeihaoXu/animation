@@ -56,7 +56,6 @@ public:
 
 	bool insert_keyframe_enabled() {return insert_keyframe_enabled_;}
 
-	bool to_save_preview = false;
 
 	
 
