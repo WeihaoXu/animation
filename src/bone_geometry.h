@@ -119,6 +119,8 @@ struct Mesh {
 	bool spline_interpolation_enabled = false;
 	int key_frame_to_overwrite;
 
+
+
 	void playAnimation();	
 
 	std::vector<Material> materials;
