@@ -495,26 +495,7 @@ int main(int argc, char* argv[])
 			gui.clearPose();
 		}
 
-		// if (gui.to_export_video_) {
-		// 	if(!export_file_opened) {
-		// 		export_file = popen(export_cmd, "w");
-		// 		export_file_opened = true;
-		// 	}
-		// 	std::cout << "export a frame" << std::endl;
-		// 	// glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		// 	glReadPixels(0, 0, 960, 720, GL_RGB, GL_UNSIGNED_BYTE, export_buffer);
-
-		// 	fwrite(export_buffer, 960 *720*3 , 1, export_file);
-			
-		// 	if(gui.getCurrentPlayTime() > mesh.key_frames.size() * 1.0 - 1.0) {
-				
-		// 		pclose(export_file);
-		// 		export_file_opened = false;
-		// 		gui.to_export_video_ = false;
-		// 		std::cout << "close file" << std::endl;
-		// 	}
-		// }
-
+		
 		// render keyframes that loaded from json file into preview textures 
 		if(mesh.to_load_animation) {
 			for(int i = 0; i < mesh.key_frames.size(); i++) {
@@ -672,6 +653,26 @@ int main(int argc, char* argv[])
 		// Poll and swap.
 		glfwPollEvents();
 		glfwSwapBuffers(window);
+		if (gui.to_export_video_) {
+			if(!export_file_opened) {
+				export_file = popen(export_cmd, "w");
+				export_file_opened = true;
+			}
+			std::cout << "export a frame" << std::endl;
+			// glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+			glReadPixels(0, 0, 960, 720, GL_RGB, GL_UNSIGNED_BYTE, export_buffer);
+
+			fwrite(export_buffer, 960 *720*3 , 1, export_file);
+			
+			if(gui.getCurrentPlayTime() > mesh.key_frames.size() * 1.0 - 1.0) {
+				
+				pclose(export_file);
+				export_file_opened = false;
+				gui.to_export_video_ = false;
+				std::cout << "close file" << std::endl;
+			}
+		}
+
 	}
 	glfwDestroyWindow(window);
 	glfwTerminate();

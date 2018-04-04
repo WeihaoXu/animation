@@ -143,15 +143,15 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		play_ = true;
 		to_export_video_ = true;
 		
-		const char* export_cmd = "ffmpeg -framerate 30 -f rawvideo -pix_fmt rgb24 -s 960x720 -i - -threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip Video.mp4";
-		FILE* export_file;
-		unsigned char* export_buffer = (unsigned char*) malloc (sizeof(char) * 960 * 720 * 3);
-		export_file = popen(export_cmd, "w");
-		for(int i = 0; i < 20; i++) {
-			glReadPixels(0, 0, 960, 720, GL_RGB, GL_UNSIGNED_BYTE, export_buffer);
-			fwrite(export_buffer, 960 *720*3 , 1, export_file);
-		}
-		pclose(export_file);
+		// const char* export_cmd = "ffmpeg -framerate 30 -f rawvideo -pix_fmt rgb24 -s 960x720 -i - -threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip Video.mp4";
+		// FILE* export_file;
+		// unsigned char* export_buffer = (unsigned char*) malloc (sizeof(char) * 960 * 720 * 3);
+		// export_file = popen(export_cmd, "w");
+		// for(int i = 0; i < 20; i++) {
+		// 	glReadPixels(0, 0, 960, 720, GL_RGB, GL_UNSIGNED_BYTE, export_buffer);
+		// 	fwrite(export_buffer, 960 *720*3 , 1, export_file);
+		// }
+		// pclose(export_file);
 		
 
 		
