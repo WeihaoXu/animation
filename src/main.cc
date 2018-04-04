@@ -21,15 +21,16 @@
 #include <glm/gtx/io.hpp>
 #include <debuggl.h>
 
-int window_width = 1280;
+int scroll_bar_width = 20;
+int window_width = 1280 + scroll_bar_width;
 int window_height = 720;
 int main_view_width = 960;
 int main_view_height = 720;
-int preview_width = window_width - main_view_width; // 320
+int preview_width = window_width - main_view_width - scroll_bar_width; // 320
 int preview_height = preview_width / 4 * 3; // 320 / 4 * 3 = 240
 int preview_bar_width = preview_width;
 int preview_bar_height = main_view_height;
-int scroll_bar_width = 10;
+
 
 
 
@@ -129,7 +130,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	GLFWwindow *window = init_glefw();
-	GUI gui(window, main_view_width, main_view_height, preview_height);
+	GUI gui(window, main_view_width, main_view_height, preview_height, scroll_bar_width);
 
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
@@ -540,8 +541,18 @@ int main(int argc, char* argv[])
 			mesh.to_overwrite_keyframe = false;
 		}
 
-		int current_bone = gui.getCurrentBone();
 
+		// draw scroll bar
+		if(draw_scroll_bar) {
+			glViewport(window_width - scroll_bar_width, 0, scroll_bar_width, window_height);
+			scroll_bar_pass.setup();
+			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+			                              scroll_bar_faces.size() * 3,
+			                              GL_UNSIGNED_INT, 0));
+			glViewport(0, 0, main_view_width, main_view_height);
+		}
+		
+		int current_bone = gui.getCurrentBone();
 		// Draw bones first.
 		if (draw_skeleton && gui.isTransparent()) {
 			bone_pass.setup();
@@ -582,14 +593,6 @@ int main(int argc, char* argv[])
 #endif
 		}
 
-		if(draw_scroll_bar) {
-			glViewport(window_width - scroll_bar_width, 0, window_width, window_height);
-			scroll_bar_pass.setup();
-			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
-			                              scroll_bar_faces.size() * 3,
-			                              GL_UNSIGNED_INT, 0));
-			glViewport(0, 0, main_view_width, main_view_height);
-		}
 		
 
 		// FIXME: update the preview textures here

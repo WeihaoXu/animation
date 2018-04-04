@@ -14,12 +14,13 @@ void main() {
 		float cube_v_height = 3.0 * 1.0 / total_preview_num;
 		float dy = 1.0 - tex_coord.y;
 		if(dy > scroll_v_coord && dy < scroll_v_coord + cube_v_height) {
-			fragment_color = vec4(0.0, 0.0, 1.0, 1.0);
+			fragment_color = vec4(0.0, 1.0, 1.0, 1.0);
 		} else {
 			fragment_color = vec4(0.0, 0.0, 0.0, 1.0);
 		}
 
 	}
+	fragment_color.a = 0.5;
 
 	
 

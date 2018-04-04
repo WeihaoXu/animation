@@ -17,8 +17,8 @@ namespace {
 	// TIPS: The implement is provided by the ray-tracer starter code.
 }
 
-GUI::GUI(GLFWwindow* window, int view_width, int view_height, int preview_height)
-	:window_(window), preview_height_(preview_height)
+GUI::GUI(GLFWwindow* window, int view_width, int view_height, int preview_height, int scroll_bar_width)
+	:window_(window), preview_height_(preview_height), scroll_bar_width_(scroll_bar_width)
 {
 	glfwSetWindowUserPointer(window_, this);
 	glfwSetKeyCallback(window_, KeyCallback);
@@ -61,8 +61,8 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		//FIXME save out a screenshot using SaveJPEG
 		unsigned char* pixmap = (unsigned char*) malloc (sizeof(char) * window_width_ * window_height_ * 3);
 		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		glReadPixels(0, 0, window_width_, window_height_, GL_RGB, GL_UNSIGNED_BYTE, pixmap);
-		SaveJPEG("screenshot.jpg", window_width_, window_height_, pixmap);
+		glReadPixels(0, 0, view_width_, view_height_, GL_RGB, GL_UNSIGNED_BYTE, pixmap);
+		SaveJPEG("screenshot.jpg", view_width_, view_height_, pixmap);
 		std::cout << "done screenshot" << std::endl;	
 	}
 	if (key == GLFW_KEY_S && (mods & GLFW_MOD_CONTROL)) {
@@ -257,7 +257,7 @@ void GUI::mouseButtonCallback(int button, int action, int mods)
 		return ;
 	}
 	// FIXME: Key Frame Selection
-	if (current_x_ > view_width_&& action == GLFW_PRESS) {
+	if (current_x_ > view_width_&& current_x_ < window_width_ - scroll_bar_width_ && action == GLFW_PRESS) {
 		// std::cout << "mouse over preview! current_y_: " << current_y_ << std::endl;
 		current_keyframe_ = ceil((view_height_ + frame_shift - current_y_) / preview_height_) - 1;
 		if(current_keyframe_ < 0 || current_keyframe_ >= mesh_->key_frames.size()) {	// invalid keyframe index
