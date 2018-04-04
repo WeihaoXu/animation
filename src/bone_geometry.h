@@ -110,6 +110,8 @@ struct Mesh {
 	bool to_save_preview = false;
 	int key_frame_to_overwrite;
 
+
+
 	void playAnimation();	
 
 	std::vector<Material> materials;
@@ -132,6 +134,7 @@ struct Mesh {
 	void insert_keyframe_before(int keyframe_index);
 
 	void saveKeyFrame();
+
 
 private:
 	void computeBounds();

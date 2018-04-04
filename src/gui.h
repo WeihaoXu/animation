@@ -56,8 +56,10 @@ public:
 
 	bool insert_keyframe_enabled() {return insert_keyframe_enabled_;}
 
+	unsigned char* get_export_buffer() {return export_buffer_;}
 
-	
+	bool to_export_video_ = false;
+	FILE* export_file = NULL;
 
 private:
 	GLFWwindow* window_;
@@ -103,7 +105,7 @@ private:
 	glm::mat4 model_matrix_ = glm::mat4(1.0f);
 
 	bool captureWASDUPDOWN(int key, int action);
-
+	unsigned char* export_buffer_;
 	bool play_ = false;
 };
 

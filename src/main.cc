@@ -155,6 +155,11 @@ int main(int argc, char* argv[])
 	int show_border = 0;
 	int show_insert_cursor = 0;
 
+	// output video things
+	const char* export_cmd = "ffmpeg -framerate 30 -f rawvideo -pix_fmt rgb24 -s 960x720 -i - -threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip Video.mp4";
+	FILE* export_file;
+	unsigned char* export_buffer = (unsigned char*) malloc (sizeof(char) * 960 * 720 * 3);
+	bool export_file_opened = false;
 
 	// FIXME: we already created meshes for cylinders. Use them to render
 	//        the cylinder and axes if required by the assignment.
@@ -490,6 +495,26 @@ int main(int argc, char* argv[])
 			gui.clearPose();
 		}
 
+		// if (gui.to_export_video_) {
+		// 	if(!export_file_opened) {
+		// 		export_file = popen(export_cmd, "w");
+		// 		export_file_opened = true;
+		// 	}
+		// 	std::cout << "export a frame" << std::endl;
+		// 	// glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+		// 	glReadPixels(0, 0, 960, 720, GL_RGB, GL_UNSIGNED_BYTE, export_buffer);
+
+		// 	fwrite(export_buffer, 960 *720*3 , 1, export_file);
+			
+		// 	if(gui.getCurrentPlayTime() > mesh.key_frames.size() * 1.0 - 1.0) {
+				
+		// 		pclose(export_file);
+		// 		export_file_opened = false;
+		// 		gui.to_export_video_ = false;
+		// 		std::cout << "close file" << std::endl;
+		// 	}
+		// }
+
 		// render keyframes that loaded from json file into preview textures 
 		if(mesh.to_load_animation) {
 			for(int i = 0; i < mesh.key_frames.size(); i++) {
@@ -540,8 +565,8 @@ int main(int argc, char* argv[])
 			mesh.to_overwrite_keyframe = false;
 		}
 
-		int current_bone = gui.getCurrentBone();
 
+		int current_bone = gui.getCurrentBone();
 		// Draw bones first.
 		if (draw_skeleton && gui.isTransparent()) {
 			bone_pass.setup();
@@ -617,7 +642,7 @@ int main(int argc, char* argv[])
 		// FIXME: Draw previews here, note you need to call glViewport
 		for(int i = 0; i < mesh.textures.size(); i++) {
 			glViewport(main_view_width, main_view_height - (i + 1) * preview_height + gui.get_frame_shift(), preview_width, preview_height);
-			std::cout << "shift is " << gui.get_frame_shift() << std::endl;
+			// std::cout << "shift is " << gui.get_frame_shift() << std::endl;
 			sampler = mesh.textures[i]->getTexture();
 
 			bool insert_enabled = gui.insert_keyframe_enabled();
