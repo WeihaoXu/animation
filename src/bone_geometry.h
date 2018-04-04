@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <mmdadapter.h>
+#include "gui.h"
 
 class TextureToRender;
 
@@ -56,6 +57,7 @@ struct Configuration {
 struct KeyFrame {
 	std::vector<glm::fquat> rel_rot;
 
+	glm::fquat camera_rel_orientation;
 	static void interpolate(const KeyFrame& from,
 	                        const KeyFrame& to,
 	                        float tau,
@@ -89,6 +91,8 @@ struct Skeleton {
 struct Mesh {
 	Mesh();
 	~Mesh();
+	void assignGUI(GUI* gui) {this->gui_ = gui;}
+
 	std::vector<glm::vec4> vertices;
 	/*
 	 * Static per-vertex attrributes for Shaders
@@ -137,6 +141,7 @@ private:
 	void computeBounds();
 	void computeNormals();
 	Configuration currentQ_;
+	GUI* gui_;
 };
 
 

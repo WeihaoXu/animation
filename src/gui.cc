@@ -121,6 +121,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	} else if(key == GLFW_KEY_U && action != GLFW_RELEASE) {	// load keyframe into main view
 		if(current_keyframe_ != -1) {	// bone selected
 			mesh_->skeleton.transform_skeleton_by_frame(mesh_->key_frames[current_keyframe_]);
+			set_camera_rel_orientation(mesh_->key_frames[current_keyframe_].camera_rel_orientation);
 			mesh_->updateAnimation();
 		}
 	} else if(key == GLFW_KEY_DELETE && action != GLFW_RELEASE) {
@@ -168,6 +169,8 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 				);
 		orientation_ =
 			glm::mat3(glm::rotate(rotation_speed_, axis) * glm::mat4(orientation_));
+		rel_orientation_quat_ =  glm::angleAxis(rotation_speed_, axis) * rel_orientation_quat_;
+
 		tangent_ = glm::column(orientation_, 0);
 		up_ = glm::column(orientation_, 1);
 		look_ = glm::column(orientation_, 2);
@@ -323,6 +326,20 @@ float GUI::getCurrentPlayTime()
 	time_ += delta_time;
 	return time_;
 	// return 0.0f;
+}
+
+void GUI::set_camera_rel_orientation(glm::fquat rel_orientation_quat) {
+	rel_orientation_quat_ = rel_orientation_quat;
+	orientation_ = glm::mat3(glm::mat4_cast(rel_orientation_quat_) * init_camera_orientation_);
+
+	// glm::mat3 reflect(1.0);
+	// reflect[0][0] = -1.0;
+	// reflect[2][2] = -1.0;
+
+	tangent_ = glm::column(orientation_, 0);
+	up_ = glm::column(orientation_, 1);
+	look_ = glm::column(orientation_, 2);
+	updateMatrices();
 }
 
 

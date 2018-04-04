@@ -56,6 +56,11 @@ public:
 
 	bool insert_keyframe_enabled() {return insert_keyframe_enabled_;}
 
+	glm::fquat get_camera_rel_orientation() {return rel_orientation_quat_;};
+
+	void set_camera_rel_orientation(glm::fquat rel_orientation_quat);
+
+
 
 	
 
@@ -106,6 +111,9 @@ private:
 	bool captureWASDUPDOWN(int key, int action);
 
 	bool play_ = false;
+
+	glm::mat4 init_camera_orientation_ = glm::mat4(orientation_);
+	glm::fquat rel_orientation_quat_;
 };
 
 #endif

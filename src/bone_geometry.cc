@@ -131,6 +131,7 @@ void KeyFrame::interpolate(const KeyFrame& from,
 		glm::fquat kf_rot = glm::mix(from.rel_rot[i], to.rel_rot[i], tau);
 		target.rel_rot.push_back(kf_rot);
 	}
+	target.camera_rel_orientation = glm::mix(from.camera_rel_orientation, to.camera_rel_orientation, tau);
 } 
 
 
@@ -243,6 +244,7 @@ void Mesh::updateAnimation(float t)
 		KeyFrame frame;
 		KeyFrame::interpolate(key_frames[frame_index], key_frames[frame_index + 1], tao, frame);
 		skeleton.transform_skeleton_by_frame(frame);
+		gui_->set_camera_rel_orientation(frame.camera_rel_orientation);
 	}
 	skeleton.refreshCache(&currentQ_);
 	
@@ -264,6 +266,7 @@ void Mesh::saveKeyFrame() {
 	for(int i = 0; i < getNumberOfBones(); i++) {
 		kf.rel_rot.push_back(skeleton.joints[i].rel_orientation);
 	}
+	kf.camera_rel_orientation = gui_->get_camera_rel_orientation();
 	key_frames.push_back(kf);
 }
 
@@ -281,6 +284,7 @@ void Mesh::overwrite_keyframe_with_current(int target_keyframe) {
 	for(int i = 0; i < getNumberOfBones(); i++) {
 		kf.rel_rot[i] = skeleton.joints[i].rel_orientation;
 	}
+	kf.camera_rel_orientation = gui_->get_camera_rel_orientation();
 	key_frame_to_overwrite = target_keyframe;
 	to_overwrite_keyframe = true;
 
@@ -295,6 +299,8 @@ void Mesh::insert_keyframe_before(int keyframe_index) {
 	for(int i = 0; i < getNumberOfBones(); i++) {
 		keyframe_to_insert.rel_rot.push_back(skeleton.joints[i].rel_orientation);
 	}
+	keyframe_to_insert.camera_rel_orientation = gui_->get_camera_rel_orientation();
+
 	key_frames.insert(key_frames.begin() + keyframe_index, keyframe_to_insert);	// std::vector::insert() inserts before pos
 	textures.insert(textures.begin() + keyframe_index, nullptr);
 	key_frame_to_overwrite = keyframe_index;

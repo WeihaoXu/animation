@@ -177,6 +177,7 @@ int main(int argc, char* argv[])
 	 * GUI object needs the mesh object for bone manipulation.
 	 */
 	gui.assignMesh(&mesh);
+	mesh.assignGUI(&gui);
 
 	glm::vec4 light_position = glm::vec4(0.0f, 100.0f, 0.0f, 1.0f);
 	MatrixPointers mats; // Define MatrixPointers here for lambda to capture
@@ -495,6 +496,7 @@ int main(int argc, char* argv[])
 		if(mesh.to_load_animation) {
 			for(int i = 0; i < mesh.key_frames.size(); i++) {
 				mesh.skeleton.transform_skeleton_by_frame(mesh.key_frames[i]);
+				gui.set_camera_rel_orientation(mesh.key_frames[i].camera_rel_orientation);
 				mesh.updateAnimation();
 				TextureToRender* texture = new TextureToRender();
 				texture->create(main_view_width, main_view_height);
@@ -510,10 +512,11 @@ int main(int argc, char* argv[])
 					mid++;
 	
 				mesh.textures.push_back(texture);
-				mesh.to_load_animation = false;
 				texture->unbind();		
 			}
+			mesh.to_load_animation = false;
 			mesh.skeleton.set_rest_pose();
+			gui.set_camera_rel_orientation(glm::fquat());
 			mesh.updateAnimation();
 		}
 
@@ -620,7 +623,7 @@ int main(int argc, char* argv[])
 		// FIXME: Draw previews here, note you need to call glViewport
 		for(int i = 0; i < mesh.textures.size(); i++) {
 			glViewport(main_view_width, main_view_height - (i + 1) * preview_height + gui.get_frame_shift(), preview_width, preview_height);
-			std::cout << "shift is " << gui.get_frame_shift() << std::endl;
+			// std::cout << "shift is " << gui.get_frame_shift() << std::endl;
 			sampler = mesh.textures[i]->getTexture();
 
 			bool insert_enabled = gui.insert_keyframe_enabled();
