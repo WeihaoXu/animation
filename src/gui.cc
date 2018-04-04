@@ -137,6 +137,10 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	} else if(key == GLFW_KEY_I && action != GLFW_RELEASE) {
 		// toggle insert mode
 		insert_keyframe_enabled_ = !insert_keyframe_enabled_;
+	} else if(key == GLFW_KEY_Q && action != GLFW_RELEASE ) {
+		// toggle interpolation mode. 
+		mesh_->spline_interpolation_enabled = !mesh_->spline_interpolation_enabled;
+		std::cout << "spline interpolation enabled? " << mesh_->spline_interpolation_enabled << std::endl;
 	}
 
 }

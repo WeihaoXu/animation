@@ -24,4 +24,6 @@ void printMat4(const glm::mat4& mat);
 void create_quad(std::vector<glm::vec4>& quad_vertices, 
 					std::vector<glm::uvec3>& quad_faces, 
 					std::vector<glm::vec2>& quad_coords);
+
+glm::fquat catmullRom(glm::fquat q0, glm::fquat q1, glm::fquat q2, glm::fquat q3, float t);
 #endif

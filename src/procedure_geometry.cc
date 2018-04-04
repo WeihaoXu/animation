@@ -223,3 +223,12 @@ void create_quad(std::vector<glm::vec4>& quad_vertices,
 	quad_coords.push_back(glm::vec2(1.0, 0.0));
 	quad_coords.push_back(glm::vec2(1.0, 1.0));		
 }
+
+// glm::fquat catmullRom(glm::fquat q0, glm::fquat q1, glm::fquat q2, glm::fquat q3, float t) {
+// 	return glm::normalize((
+//         (q1 * 2.0f) +
+//         (-q0 + q2) * t +
+//         (q0 * 2.0f  +  q1 * (-5.0f)  +  q2 * 4.0f  + q3 * (-1.0)) * t * t +
+//         (-q0 + q1 *  3.0f  + q2 * (-3.0f)  + q3) * t * t * t
+//         ) * 0.5f);
+// }

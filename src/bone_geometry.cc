@@ -8,6 +8,11 @@
 #include <glm/gtx/io.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/spline.hpp>
+
+
+
+
 
 #include "procedure_geometry.h"
 
@@ -134,6 +139,46 @@ void KeyFrame::interpolate(const KeyFrame& from,
 	target.camera_rel_orientation = glm::mix(from.camera_rel_orientation, to.camera_rel_orientation, tau);
 } 
 
+// https://stackoverflow.com/questions/48235470/spline-interpolation-of-animated-scale?rq=1
+// https://stackoverflow.com/questions/37230747/how-can-i-generate-a-spline-curve-using-glm-gtx-splinecatmullrom
+
+void KeyFrame::interpolate_frame_spline(std::vector<KeyFrame>& key_frames, 
+	                        float t,
+	                        KeyFrame& target) {
+	// interpolate joints
+	for(int bone_idx = 0; bone_idx < key_frames[0].rel_rot.size(); bone_idx++) {
+		std::vector<glm::fquat> per_bone_rel_rots;
+		for(int frame_idx = 0; frame_idx < key_frames.size(); frame_idx++) {
+			per_bone_rel_rots.push_back(key_frames[frame_idx].rel_rot[bone_idx]);
+		}
+		glm::fquat current_bone_rot = catmull_rom_spline(per_bone_rel_rots, t);
+		target.rel_rot.push_back(current_bone_rot);
+	}
+
+	// interolate camera orientation
+	std::vector<glm::fquat> per_bone_camera_rot;
+	for(int frame_idx = 0; frame_idx < key_frames.size(); frame_idx++) {
+		per_bone_camera_rot.push_back(key_frames[frame_idx].camera_rel_orientation);
+	}	
+	target.camera_rel_orientation = catmull_rom_spline(per_bone_camera_rot, t);
+
+
+} 
+
+glm::fquat KeyFrame::catmull_rom_spline(const std::vector<glm::fquat>& cp, float t)
+{
+    // indices of the relevant control points
+    int i0 = glm::clamp<int>(t - 1, 0, cp.size() - 1);
+    int i1 = glm::clamp<int>(t,     0, cp.size() - 1);
+    int i2 = glm::clamp<int>(t + 1, 0, cp.size() - 1);
+    int i3 = glm::clamp<int>(t + 2, 0, cp.size() - 1);
+
+    // parameter on the local curve interval
+    float local_t = glm::fract(t);
+
+    glm::catmullRom(cp[i0], cp[i1], cp[i2], cp[i3], local_t);
+}
+
 
 Mesh::Mesh()
 {
@@ -231,6 +276,7 @@ void Mesh::computeBounds()
 
 
 
+
 void Mesh::updateAnimation(float t)
 {
 
@@ -242,7 +288,12 @@ void Mesh::updateAnimation(float t)
 
 		float tao = t - frame_index;
 		KeyFrame frame;
-		KeyFrame::interpolate(key_frames[frame_index], key_frames[frame_index + 1], tao, frame);
+		if(spline_interpolation_enabled) {
+			KeyFrame::interpolate_frame_spline(key_frames, t, frame);
+		}
+		else {
+			KeyFrame::interpolate(key_frames[frame_index], key_frames[frame_index + 1], tao, frame);
+		}
 		skeleton.transform_skeleton_by_frame(frame);
 		gui_->set_camera_rel_orientation(frame.camera_rel_orientation);
 	}

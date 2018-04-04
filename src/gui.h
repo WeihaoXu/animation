@@ -62,6 +62,7 @@ public:
 
 
 
+
 	
 
 private:
@@ -78,7 +79,6 @@ private:
 	bool transparent_ = false;
 
 	bool insert_keyframe_enabled_ = false;
-
 	int current_bone_ = -1;
 	int current_keyframe_ = -1;
 	int current_button_ = -1;

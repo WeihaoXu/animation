@@ -62,6 +62,10 @@ struct KeyFrame {
 	                        const KeyFrame& to,
 	                        float tau,
 	                        KeyFrame& target);
+	static void interpolate_frame_spline(std::vector<KeyFrame>& key_frames, 
+				                        float t,
+				                        KeyFrame& target);
+	static glm::fquat catmull_rom_spline(const std::vector<glm::fquat>& cp, float t);
 };
 
 struct LineMesh {
@@ -112,6 +116,7 @@ struct Mesh {
 	bool to_load_animation = false;	// flag of load animation from external files
 	bool to_overwrite_keyframe = false;
 	bool to_save_preview = false;
+	bool spline_interpolation_enabled = false;
 	int key_frame_to_overwrite;
 
 	void playAnimation();	
@@ -136,6 +141,7 @@ struct Mesh {
 	void insert_keyframe_before(int keyframe_index);
 
 	void saveKeyFrame();
+
 
 private:
 	void computeBounds();
