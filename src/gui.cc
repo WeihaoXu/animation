@@ -150,11 +150,22 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		std::cout << "spline interpolation enabled? " << mesh_->spline_interpolation_enabled << std::endl;
 
 	} else if(key == GLFW_KEY_O && action != GLFW_RELEASE) {
-		
 		time_ = 0;
 		*timer_ = tic();
 		play_ = true;
 		to_export_video_ = true;
+	} else if(key == GLFW_KEY_PAGE_UP && action != GLFW_RELEASE) {
+		if(mesh_->textures.size() > 0) {
+			current_keyframe_ = (int) (current_keyframe_ - 1 + mesh_->textures.size()) % mesh_->textures.size();
+		} else {
+			current_keyframe_ = -1;
+		}
+	} else if(key == GLFW_KEY_PAGE_DOWN && action != GLFW_RELEASE) {
+		if(mesh_->textures.size() > 0) {
+			current_keyframe_ = (int) (current_keyframe_ + 1 + mesh_->textures.size()) % mesh_->textures.size();
+		} else {
+			current_keyframe_ = -1;
+		}
 	}
 
 }
