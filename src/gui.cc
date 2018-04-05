@@ -126,20 +126,20 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	} else if(key == GLFW_KEY_R && action != GLFW_RELEASE) {	// reset timer
 		time_ = 0;
 	} else if(key == GLFW_KEY_U && action != GLFW_RELEASE) {	// load keyframe into main view
-		if(current_keyframe_ != -1) {	// bone selected
-			mesh_->skeleton.transform_skeleton_by_frame(mesh_->key_frames[current_keyframe_]);
-			set_camera_rel_orientation(mesh_->key_frames[current_keyframe_].camera_rel_orientation);
-			mesh_->updateAnimation();
-		}
+		if(!insert_keyframe_enabled_ && current_keyframe_ != -1) {	// override keyframe
+			mesh_->overwrite_keyframe_with_current(current_keyframe_);
+		} 
 	} else if(key == GLFW_KEY_DELETE && action != GLFW_RELEASE) {
 		std::cout << "current_keyframe_ = " << current_keyframe_ << std::endl;
 		if(mesh_->key_frames.size() > 0 && current_keyframe_ >= 0) {
 			mesh_->delete_keyframe(current_keyframe_);
 		}
 	} else if(key == GLFW_KEY_SPACE && action != GLFW_RELEASE) {
-		if(!insert_keyframe_enabled_ && current_keyframe_ != -1) {	// override keyframe
-			mesh_->overwrite_keyframe_with_current(current_keyframe_);
-		} 
+		if(current_keyframe_ != -1) {	// bone selected
+			mesh_->skeleton.transform_skeleton_by_frame(mesh_->key_frames[current_keyframe_]);
+			set_camera_rel_orientation(mesh_->key_frames[current_keyframe_].camera_rel_orientation);
+			mesh_->updateAnimation();
+		}
 	} else if(key == GLFW_KEY_I && action != GLFW_RELEASE) {
 		// toggle insert mode
 		insert_keyframe_enabled_ = !insert_keyframe_enabled_;
@@ -181,18 +181,20 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	if (sqrt(delta_x * delta_x + delta_y * delta_y) < 1e-15)
 		return;
 	if(current_x_ > window_width_ - scroll_bar_width_ && current_x_ < window_width_) {	// scroll bar
-		bool drag_scroll_bar = (drag_scroll_bar_state_ && current_button_ == GLFW_MOUSE_BUTTON_LEFT);
-		int cube_start_pos = (int) 3.0 * frame_shift / mesh_->textures.size();
-		int cube_height = (int) window_height_ * 3.0 / mesh_->textures.size();
-		bool mouse_on_cube = (window_height_ - current_y_ > cube_start_pos && window_height_ - current_y_ < cube_start_pos + cube_height);
-		if(drag_scroll_bar && mouse_on_cube) {
-			int MIN_SHIFT = 0;
-			int MAX_SHIFT = mesh_->textures.size() * preview_height_ - 3 * preview_height_;
-			MAX_SHIFT = std::max(0, MAX_SHIFT);
-			frame_shift -= (int) (mesh_->textures.size() / 3.0) * delta_y;
-			frame_shift = std::max(MIN_SHIFT, frame_shift);
-			frame_shift = std::min(MAX_SHIFT, frame_shift);
-			// std::cout << "x = " << current_x_ << ", y = " << current_y_ << std::endl;
+		if(mesh_->textures.size() > 3) {
+			bool drag_scroll_bar = (drag_scroll_bar_state_ && current_button_ == GLFW_MOUSE_BUTTON_LEFT);
+			int cube_start_pos = (int) 3.0 * frame_shift / mesh_->textures.size();
+			int cube_height = (int) window_height_ * 3.0 / mesh_->textures.size();
+			bool mouse_on_cube = (window_height_ - current_y_ > cube_start_pos && window_height_ - current_y_ < cube_start_pos + cube_height);
+			if(drag_scroll_bar && mouse_on_cube) {
+				int MIN_SHIFT = 0;
+				int MAX_SHIFT = mesh_->textures.size() * preview_height_ - 3 * preview_height_;
+				MAX_SHIFT = std::max(0, MAX_SHIFT);
+				frame_shift -= (int) (mesh_->textures.size() / 3.0) * delta_y;
+				frame_shift = std::max(MIN_SHIFT, frame_shift);
+				frame_shift = std::min(MAX_SHIFT, frame_shift);
+				// std::cout << "x = " << current_x_ << ", y = " << current_y_ << std::endl;
+			}
 		}
 	}
 	if (mouse_x > view_width_ && mouse_x < window_width_ - scroll_bar_width_ || mouse_x > window_width_) {

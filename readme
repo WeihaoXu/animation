@@ -6,7 +6,7 @@ Extra Bonus:
 - Press "i" to toggle insert/append mode. This will changes the cursor of selection.
 - when in insert mode, press "F" will insert the new frame before your selected frame.
 
-2. scroll bar.
+2. scroll bar for previews.
 
 3. Export Video: Press "O" and the window will play an animation through all key frames and export it as a video named "Video.mp3".
 
