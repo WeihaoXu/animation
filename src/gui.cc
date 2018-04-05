@@ -106,9 +106,16 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 
 	// FIXME: implement other controls here.
 	else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
-		std::cout << "keyframe saved" << std::endl;
-		mesh_->saveKeyFrame();
-		mesh_->to_save_preview = true;
+		if(insert_keyframe_enabled_ && current_keyframe_ != -1) {
+			mesh_->insert_keyframe_before(current_keyframe_);
+			current_keyframe_ += 1;
+			std::cout << "keyframe inserted" << std::endl;
+		} else {
+			mesh_->saveKeyFrame();
+			mesh_->to_save_preview = true;
+			std::cout << "keyframe appended" << std::endl;
+		}
+		
 	} else if (key == GLFW_KEY_P && action != GLFW_RELEASE) {	// resume/pause timer
 		if(!play_) {
 			play_ = true;
@@ -125,15 +132,14 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 			mesh_->updateAnimation();
 		}
 	} else if(key == GLFW_KEY_DELETE && action != GLFW_RELEASE) {
-		if(current_keyframe_ != -1) {
+		std::cout << "current_keyframe_ = " << current_keyframe_ << std::endl;
+		if(mesh_->key_frames.size() > 0 && current_keyframe_ >= 0) {
 			mesh_->delete_keyframe(current_keyframe_);
 		}
 	} else if(key == GLFW_KEY_SPACE && action != GLFW_RELEASE) {
 		if(!insert_keyframe_enabled_ && current_keyframe_ != -1) {	// override keyframe
 			mesh_->overwrite_keyframe_with_current(current_keyframe_);
-		} else if(insert_keyframe_enabled_ && current_keyframe_ != -1){	// insert a new keyframe after current_keyframe
-			mesh_->insert_keyframe_before(current_keyframe_);
-		}
+		} 
 	} else if(key == GLFW_KEY_I && action != GLFW_RELEASE) {
 		// toggle insert mode
 		insert_keyframe_enabled_ = !insert_keyframe_enabled_;
