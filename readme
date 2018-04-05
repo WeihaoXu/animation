@@ -10,6 +10,6 @@ Extra Bonus:
 
 3. Export Video: Press "O" and the window will play an animation through all key frames and export it as a video named "Video.mp3".
 
-4. The rotation of camera is keyframed. 
+4. The rotation of camera is keyframed(but not the translation of light position).
 
-5. Press "q" to toggle SLERP/Spline interpolation of keyframes. 
+5. Implemented Spherical Spline Quaternion interpolation. It's implemented in "procedure_geometry.cc" file, named "my_squad". Press "q" to toggle SLERP/Spline interpolation of keyframes. 

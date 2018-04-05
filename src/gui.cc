@@ -171,7 +171,10 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		return;
 	if(current_x_ > window_width_ - scroll_bar_width_ && current_x_ < window_width_) {	// scroll bar
 		bool drag_scroll_bar = (drag_scroll_bar_state_ && current_button_ == GLFW_MOUSE_BUTTON_LEFT);
-		if(drag_scroll_bar) {
+		int cube_start_pos = (int) 3.0 * frame_shift / mesh_->textures.size();
+		int cube_height = (int) window_height_ * 3.0 / mesh_->textures.size();
+		bool mouse_on_cube = (window_height_ - current_y_ > cube_start_pos && window_height_ - current_y_ < cube_start_pos + cube_height);
+		if(drag_scroll_bar && mouse_on_cube) {
 			int MIN_SHIFT = 0;
 			int MAX_SHIFT = mesh_->textures.size() * preview_height_ - 3 * preview_height_;
 			MAX_SHIFT = std::max(0, MAX_SHIFT);
@@ -321,6 +324,10 @@ void GUI::mouseScrollCallback(double dx, double dy)
 	frame_shift += -20 * (int)dy;
 	frame_shift = std::max(MIN_SHIFT, frame_shift);
 	frame_shift = std::min(MAX_SHIFT, frame_shift);
+
+	int cube_start_pos = (int) 3 * frame_shift / mesh_->textures.size();
+	std::cout << "cube start positon: " << cube_start_pos << std::endl;
+
 }
 
 void GUI::updateMatrices()
