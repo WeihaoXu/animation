@@ -1,0 +1,15 @@
+Name: Weihao Xu, Ming Zong
+
+Extra Bonus:
+
+1. insert keyframe:
+- Press "i" to toggle insert/append mode. This will changes the cursor of selection.
+- when in insert mode, press "F" will insert the new frame before your selected frame.
+
+2. scroll bar.
+
+3. Export Video: Press "O" and the window will play an animation through all key frames and export it as a video named "Video.mp3".
+
+4. The rotation of camera is keyframed. 
+
+5. Press "q" to toggle SLERP/Spline interpolation of keyframes. 

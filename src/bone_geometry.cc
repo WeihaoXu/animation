@@ -153,6 +153,10 @@ void KeyFrame::interpolate_frame_spline(std::vector<KeyFrame>& key_frames,
 		}
 		glm::fquat current_bone_rot = catmull_rom_spline(per_bone_rel_rots, t);
 		target.rel_rot.push_back(current_bone_rot);
+		if(bone_idx == 13) {
+			std::cout << "rel_rot " << bone_idx << " quaternion: " << current_bone_rot << std::endl;
+		}
+		
 	}
 
 	// interolate camera orientation
@@ -176,7 +180,7 @@ glm::fquat KeyFrame::catmull_rom_spline(const std::vector<glm::fquat>& cp, float
     // parameter on the local curve interval
     float local_t = glm::fract(t);
 
-    glm::catmullRom(cp[i0], cp[i1], cp[i2], cp[i3], local_t);
+    return glm::normalize(glm::catmullRom(cp[i0], cp[i1], cp[i2], cp[i3], local_t));
 }
 
 

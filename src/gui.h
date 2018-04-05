@@ -112,6 +112,20 @@ private:
 	glm::mat4 projection_matrix_;
 	glm::mat4 model_matrix_ = glm::mat4(1.0f);
 
+
+	// glm::vec3 lightInvDir = glm::normalize(light_position_ - center_);
+	// // Compute the MVP matrix from the light's point of view
+	// glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10,10,-10,10,-10,20);
+	// glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0,0,0), glm::vec3(0,1,0));
+	// glm::mat4 depthModelMatrix = glm::mat4(1.0);
+	// glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+
+	// // Send our transformation to the currently bound shader,
+	// // in the "MVP" uniform
+	// glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0])
+
+
+
 	bool captureWASDUPDOWN(int key, int action);
 	unsigned char* export_buffer_;
 	bool play_ = false;

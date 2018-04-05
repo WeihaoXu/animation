@@ -155,22 +155,6 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		*timer_ = tic();
 		play_ = true;
 		to_export_video_ = true;
-		
-		// const char* export_cmd = "ffmpeg -framerate 30 -f rawvideo -pix_fmt rgb24 -s 960x720 -i - -threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip Video.mp4";
-		// FILE* export_file;
-		// unsigned char* export_buffer = (unsigned char*) malloc (sizeof(char) * 960 * 720 * 3);
-		// export_file = popen(export_cmd, "w");
-		// for(int i = 0; i < 20; i++) {
-		// 	glReadPixels(0, 0, 960, 720, GL_RGB, GL_UNSIGNED_BYTE, export_buffer);
-		// 	fwrite(export_buffer, 960 *720*3 , 1, export_file);
-		// }
-		// pclose(export_file);
-		
-
-		
-
-
-
 	}
 
 }
@@ -194,7 +178,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 			frame_shift -= (int) (mesh_->textures.size() / 3.0) * delta_y;
 			frame_shift = std::max(MIN_SHIFT, frame_shift);
 			frame_shift = std::min(MAX_SHIFT, frame_shift);
-			std::cout << "x = " << current_x_ << ", y = " << current_y_ << std::endl;
+			// std::cout << "x = " << current_x_ << ", y = " << current_y_ << std::endl;
 		}
 	}
 	if (mouse_x > view_width_ && mouse_x < window_width_ - scroll_bar_width_ || mouse_x > window_width_) {
