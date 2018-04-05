@@ -21,7 +21,7 @@
 #include <glm/gtx/io.hpp>
 #include <debuggl.h>
 
-int scroll_bar_width = 20;
+int scroll_bar_width = 30;
 int window_width = 1280 + scroll_bar_width;
 int window_height = 720;
 int main_view_width = 960;

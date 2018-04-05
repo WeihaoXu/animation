@@ -179,8 +179,24 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	float delta_y = current_y_ - last_y_;
 	if (sqrt(delta_x * delta_x + delta_y * delta_y) < 1e-15)
 		return;
-	if (mouse_x > view_width_)
+	if(current_x_ > window_width_ - scroll_bar_width_ && current_x_ < window_width_) {	// scroll bar
+		bool drag_scroll_bar = (drag_scroll_bar_state_ && current_button_ == GLFW_MOUSE_BUTTON_LEFT);
+		if(drag_scroll_bar) {
+			int MIN_SHIFT = 0;
+			int MAX_SHIFT = mesh_->textures.size() * preview_height_ - 3 * preview_height_;
+			MAX_SHIFT = std::max(0, MAX_SHIFT);
+			frame_shift -= (int) (mesh_->textures.size() / 3.0) * delta_y;
+			frame_shift = std::max(MIN_SHIFT, frame_shift);
+			frame_shift = std::min(MAX_SHIFT, frame_shift);
+			std::cout << "x = " << current_x_ << ", y = " << current_y_ << std::endl;
+		}
+	}
+	if (mouse_x > view_width_ && mouse_x < window_width_ - scroll_bar_width_ || mouse_x > window_width_) {
+		drag_state_ = false;
+		drag_scroll_bar_state_ = false;
 		return ;
+	}
+		
 	glm::vec3 mouse_direction = glm::normalize(glm::vec3(delta_x, delta_y, 0.0f));
 	glm::vec2 mouse_start = glm::vec2(last_x_, last_y_);
 	glm::vec2 mouse_end = glm::vec2(current_x_, current_y_);
@@ -286,7 +302,10 @@ void GUI::mouseButtonCallback(int button, int action, int mods)
 		drag_state_ = (action == GLFW_PRESS);
 		current_button_ = button;
 		return ;
-	}
+	} else if(current_x_ > (window_width_ - scroll_bar_width_) && current_x_ < window_width_) {	// drag scroll bar
+		drag_scroll_bar_state_ = (action == GLFW_PRESS);
+		current_button_ = button;
+	} 
 	// FIXME: Key Frame Selection
 	if (current_x_ > view_width_&& current_x_ < window_width_ - scroll_bar_width_ && action == GLFW_PRESS) {
 		// std::cout << "mouse over preview! current_y_: " << current_y_ << std::endl;

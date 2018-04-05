@@ -77,6 +77,7 @@ private:
 	int preview_height_;
 	int scroll_bar_width_;
 	bool drag_state_ = false;
+	bool drag_scroll_bar_state_ = false;
 	bool fps_mode_ = false;
 	bool pose_changed_ = true;
 	bool transparent_ = false;
