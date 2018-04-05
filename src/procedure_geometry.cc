@@ -224,11 +224,12 @@ void create_quad(std::vector<glm::vec4>& quad_vertices,
 	quad_coords.push_back(glm::vec2(1.0, 1.0));		
 }
 
-// glm::fquat catmullRom(glm::fquat q0, glm::fquat q1, glm::fquat q2, glm::fquat q3, float t) {
-// 	return glm::normalize((
-//         (q1 * 2.0f) +
-//         (-q0 + q2) * t +
-//         (q0 * 2.0f  +  q1 * (-5.0f)  +  q2 * 4.0f  + q3 * (-1.0)) * t * t +
-//         (-q0 + q1 *  3.0f  + q2 * (-3.0f)  + q3) * t * t * t
-//         ) * 0.5f);
-// }
+
+// Spherical Spline Quaternion interpolation: Squad. reference: http://web.mit.edu/2.998/www/QuaternionReport1.pdf
+glm::fquat my_squad(glm::fquat q1, glm::fquat q2, glm::fquat q3, glm::fquat q4, float tao) {
+	glm::fquat s2 = q2 * glm::exp(-0.25f * (glm::log(glm::inverse(q2) * q3) + glm::log(glm::inverse(q2) * q1)));
+	glm::fquat s3 = q3 * glm::exp(-0.25f * (glm::log(glm::inverse(q3) * q4) + glm::log(glm::inverse(q3) * q2)));
+	glm::fquat slerp1 = glm::mix(q2, q3, tao);
+	glm::fquat slerp2 = glm::mix(s2, s3, tao);
+	return glm::mix(slerp1, slerp2, 2 * tao * (1 - tao));
+}

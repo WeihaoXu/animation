@@ -139,8 +139,6 @@ void KeyFrame::interpolate(const KeyFrame& from,
 	target.camera_rel_orientation = glm::mix(from.camera_rel_orientation, to.camera_rel_orientation, tau);
 } 
 
-// https://stackoverflow.com/questions/48235470/spline-interpolation-of-animated-scale?rq=1
-// https://stackoverflow.com/questions/37230747/how-can-i-generate-a-spline-curve-using-glm-gtx-splinecatmullrom
 
 void KeyFrame::interpolate_frame_spline(std::vector<KeyFrame>& key_frames, 
 	                        float t,
@@ -153,10 +151,6 @@ void KeyFrame::interpolate_frame_spline(std::vector<KeyFrame>& key_frames,
 		}
 		glm::fquat current_bone_rot = catmull_rom_spline(per_bone_rel_rots, t);
 		target.rel_rot.push_back(current_bone_rot);
-		if(bone_idx == 13) {
-			std::cout << "rel_rot " << bone_idx << " quaternion: " << current_bone_rot << std::endl;
-		}
-		
 	}
 
 	// interolate camera orientation
@@ -169,6 +163,8 @@ void KeyFrame::interpolate_frame_spline(std::vector<KeyFrame>& key_frames,
 
 } 
 
+// use glm::clamp to get 4 neighboring quaternions for every keyframe. 
+// Reference: https://stackoverflow.com/questions/37230747/how-can-i-generate-a-spline-curve-using-glm-gtx-splinecatmullrom
 glm::fquat KeyFrame::catmull_rom_spline(const std::vector<glm::fquat>& cp, float t)
 {
     // indices of the relevant control points
@@ -179,8 +175,7 @@ glm::fquat KeyFrame::catmull_rom_spline(const std::vector<glm::fquat>& cp, float
 
     // parameter on the local curve interval
     float local_t = glm::fract(t);
-
-    return glm::normalize(glm::catmullRom(cp[i0], cp[i1], cp[i2], cp[i3], local_t));
+    return my_squad(cp[i0], cp[i1], cp[i2], cp[i3], local_t);
 }
 
 
